@@ -5,6 +5,8 @@
 [![](https://images.microbadger.com/badges/version/nathanvaughn/webtrees.svg)](https://microbadger.com/images/nathanvaughn/webtrees)
 [![](https://images.microbadger.com/badges/license/nathanvaughn/webtrees.svg)](https://microbadger.com/images/nathanvaughn/webtrees)
 
+This is an up-to-date Docker image for webtrees served over HTTP, designed to be put behind a reverse proxy such as Cloudflare.
+
 ## Usage
 
 ### Quickstart
