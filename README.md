@@ -7,7 +7,13 @@
 
 ## Usage
 
-Once you start with the container, you can visit http://ipaddress:port/setup.php and begin the setup wizard.
+### Quickstart
+
+An example `docker-compose.yml` file is provided for reference.
+
+You can launch the example with `docker-compose up -d`.
+
+Once you start the container, you can visit http://localhost:1000/setup.php and begin the setup wizard.
 
 ### Network
 
@@ -18,7 +24,7 @@ The image exposes port 80.
 The image mounts:
   - `/var/www/webtrees/data/`
   - `/var/www/webtrees/media/`
-  
+
 ### MySQL
 
 Webtrees requires a MySQL database. You will need a separate container for this.
