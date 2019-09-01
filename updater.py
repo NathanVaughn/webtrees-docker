@@ -51,6 +51,7 @@ def update_dockerfile(version):
 
 
 def setup_git():
+    subprocess.call(["git", "config", "credential.helper", "store"])
     subprocess.call(["git", "config", "user.name", os.environ["GITHUB_ACTOR"]])
     subprocess.call(
         [
@@ -60,6 +61,11 @@ def setup_git():
             os.environ["GITHUB_ACTOR"] + "@users.noreply.github.com",
         ]
     )
+
+    with open(os.path.join(os.environ["HOME"], ".git-credentials", "w")) as f:
+        f.write(
+            "https://{}:x-oauth-basic@github.com".format(os.environ["GITHUB_TOKEN"])
+        )
 
 
 def push_changes(branch, version, prerelease):
