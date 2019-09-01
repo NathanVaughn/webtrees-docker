@@ -1,0 +1,20 @@
+name: Update Dockerfile
+
+on:
+  schedule:
+    - cron:  '0 8 * * *'
+
+jobs:
+  main:
+
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@master
+    - name: Install pip requirements
+      uses: actions/setup-python@master
+    - name: Run updater script
+      run: python3 updater.py
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
