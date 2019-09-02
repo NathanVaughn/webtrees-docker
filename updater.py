@@ -27,9 +27,9 @@ def get_latest_version(repo):
 def determine_branch(version, prerelease):
     if not prerelease:
         return "master"
-    elif "beta" in version:
+    if "beta" in version:
         return "beta"
-    elif "alpha" in version:
+    if "alpha" in version:
         return "alpha"
 
 
@@ -102,11 +102,13 @@ def main():
         update_dockerfile(webtrees_version)
         setup_git()
         push_changes(branch, webtrees_version, webtrees_prerelease)
+
+        print("Dockerfile updated")
         sys.exit(0)
 
     else:
         print("Versions are same. Exiting.")
-        sys.exit(1)
+        sys.exit(0)
 
 
 if __name__ == "__main__":

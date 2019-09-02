@@ -13,7 +13,7 @@ jobs:
     - name: Checkout code
       uses: actions/checkout@master
     - name: Install pip requirements
-      uses: actions/setup-python@master
+      run: pip install -r requirements.txt
     - name: Run updater script
       run: python3 updater.py
       env:
