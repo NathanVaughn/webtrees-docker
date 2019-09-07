@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@master
+    - name: Install setuptools
+      run: sudo apt install python3-setuptools
     - name: Install pip requirements
       run: pip3 install -r requirements.txt
     - name: Run updater script
