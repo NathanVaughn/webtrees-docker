@@ -1,4 +1,4 @@
-FROM php:7.3.9-apache-stretch
+FROM php:7.3.10-apache-stretch
 
 ENV WEBTREES_VERSION=1.7.14
 ENV WEBTREES_HOME="/var/www/webtrees"
