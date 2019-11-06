@@ -1,7 +1,7 @@
 FROM php:7.3.11-apache-stretch
 
-ENV WEBTREES_VERSION=1.7.14
-ENV WEBTREES_HOME="/var/www/webtrees"
+ENV WEBTREES_VERSION=2.0.0-beta.4 \
+    WEBTREES_HOME="/var/www/webtrees"
 
 RUN apt-get update && apt-get install -y git wget zlib1g-dev libfreetype6-dev libjpeg62-turbo-dev libmcrypt-dev libpng-dev wget libldap2-dev libtidy-dev\
    && docker-php-ext-install pdo pdo_mysql \
