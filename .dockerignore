@@ -1,4 +1,9 @@
 README.md
-LICENCE
-.git
+LICENSE
+
 docker-compose.yml
+updater.py
+requirements.txt
+
+.git/*
+.github/*
