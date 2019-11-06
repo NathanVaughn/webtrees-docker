@@ -24,19 +24,6 @@ def get_latest_version(repo):
     return version, prerelease
 
 
-def determine_branch(version, prerelease):
-    if not prerelease:
-        return "master"
-    if "beta" in version:
-        return "beta"
-    if "alpha" in version:
-        return "alpha"
-
-
-def checkout_branch(branch):
-    subprocess.call(["git", "checkout", "-B", branch])
-
-
 def update_dockerfile(version):
     phrase = "ENV WEBTREES_VERSION="
 
@@ -68,7 +55,7 @@ def setup_git():
         )
 
 
-def push_changes(branch, version, prerelease):
+def push_changes(version, prerelease):
     subprocess.call(["git", "add", "--all"])
 
     timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
@@ -81,7 +68,7 @@ def push_changes(branch, version, prerelease):
 
     subprocess.call(["git", "commit", "-m", automated_message])
     subprocess.call(["git", "tag", "-a", version, "-m", nice_message])
-    subprocess.call(["git", "push", "origin", branch])
+    subprocess.call(["git", "push", "origin", "master"])
 
     g = Github(os.environ["GITHUB_TOKEN"])
     repo = g.get_repo(MY_REPO)
@@ -97,11 +84,9 @@ def main():
     if webtrees_version != my_version:
         print("Version mismatch, updating dockerfile")
 
-        branch = determine_branch(webtrees_version, webtrees_prerelease)
-        checkout_branch(branch)
         update_dockerfile(webtrees_version)
         setup_git()
-        push_changes(branch, webtrees_version, webtrees_prerelease)
+        push_changes(webtrees_version, webtrees_prerelease)
 
         print("Dockerfile updated")
         sys.exit(0)
