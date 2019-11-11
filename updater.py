@@ -49,7 +49,7 @@ def setup_git():
         ]
     )
 
-    with open(os.path.join(os.environ["HOME"], ".git-credentials", "w")) as f:
+    with open(os.path.join(os.environ["HOME"], ".git-credentials"), "w") as f:
         f.write(
             "https://{}:x-oauth-basic@github.com".format(os.environ["GITHUB_TOKEN"])
         )
