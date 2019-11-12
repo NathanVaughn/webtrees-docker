@@ -11,17 +11,17 @@ WEBTREES_REPO = "fisharebest/webtrees"
 MY_REPO = os.environ["GITHUB_REPOSITORY"]
 
 
-def get_latest_version(repo):
+def get_latest_versions(repo, number=3):
     url = "https://api.github.com/repos/{}/releases".format(repo)
     data = urllib.request.urlopen(url)
     json_data = json.loads(data.read().decode())
-    latest_release = json_data[0]
+    latest_releases = json_data[0:number]
 
-    version = latest_release["name"]
-    prerelease = latest_release["prerelease"]
+    data = []
+    for release in latest_releases:
+        data.append({"number": release["name"], "prerelease": release["prerelease"]})
 
-    print("{} latest version: {}".format(repo, version))
-    return version, prerelease
+    return data
 
 
 def update_dockerfile(version):
@@ -66,9 +66,10 @@ def push_changes(version, prerelease):
     print(automated_message)
     print(nice_message)
 
+    subprocess.call(["git", "pull", "origin", "master"])
     subprocess.call(["git", "commit", "-m", automated_message])
     subprocess.call(["git", "tag", "-a", version, "-m", nice_message])
-    subprocess.call(["git", "push", "origin", "master"])
+    subprocess.call(["git", "push", "-u", "origin", "master"])
 
     g = Github(os.environ["GITHUB_TOKEN"])
     repo = g.get_repo(MY_REPO)
@@ -78,23 +79,26 @@ def push_changes(version, prerelease):
 
 
 def main():
-    webtrees_version, webtrees_prerelease = get_latest_version(WEBTREES_REPO)
-    my_version, _ = get_latest_version(MY_REPO)
+    webtrees_versions = get_latest_versions(WEBTREES_REPO)
+    my_versions = get_latest_versions(MY_REPO)
 
-    if webtrees_version != my_version:
-        print("Version mismatch, updating dockerfile")
+    for version in webtrees_versions:
+        version_number = version["number"]
+        version_prerelease = version["prerelease"]
 
-        update_dockerfile(webtrees_version)
-        setup_git()
-        push_changes(webtrees_version, webtrees_prerelease)
+        if version not in my_versions:
+            print("Version {} missing, updating dockerfile.".format(version_number))
 
-        print("Dockerfile updated")
-        sys.exit(0)
+            update_dockerfile(version_number)
+            setup_git()
+            push_changes(version_number, version_prerelease)
 
-    else:
-        print("Versions are same. Exiting.")
-        sys.exit(0)
+            print("Dockerfile updated.")
 
+        else:
+            print("Version {} found. Skipping.".format(version_number))
+
+    sys.exit(0)
 
 if __name__ == "__main__":
     main()
