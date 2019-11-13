@@ -67,7 +67,7 @@ def push_changes(version, prerelease):
     subprocess.call(["git", "add", "--all"])
     subprocess.call(["git", "commit", "-m", '"{}"'.format(automated_message)])
     subprocess.call(["git", "tag", "-a", version, "-m", nice_message])
-    subprocess.call(["git", "push", "-u", "origin", "master"])
+    subprocess.call(["git", "push", "-u", "origin", "master", "--force"])
 
     g = Github(os.environ["GITHUB_TOKEN"])
     repo = g.get_repo(MY_REPO)
@@ -80,6 +80,8 @@ def main():
     webtrees_versions = get_latest_versions(WEBTREES_REPO)
     my_versions = get_latest_versions(MY_REPO)
 
+    setup_git()
+
     for version in webtrees_versions:
         version_number = version["number"]
         version_prerelease = version["prerelease"]
@@ -88,7 +90,6 @@ def main():
             print("Version {} missing, updating dockerfile.".format(version_number))
 
             update_dockerfile(version_number)
-            setup_git()
             push_changes(version_number, version_prerelease)
 
             print("Dockerfile updated.")
