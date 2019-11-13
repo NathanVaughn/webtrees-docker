@@ -56,8 +56,6 @@ def setup_git():
 
 
 def push_changes(version, prerelease):
-    subprocess.call(["git", "add", "--all"])
-
     timestamp = datetime.datetime.now(datetime.timezone.utc).isoformat()
     automated_message = "Automated deployment: " + timestamp
 
@@ -66,8 +64,8 @@ def push_changes(version, prerelease):
     print(automated_message)
     print(nice_message)
 
-    subprocess.call(["git", "pull", "origin", "master"])
-    subprocess.call(["git", "commit", "-m", automated_message])
+    subprocess.call(["git", "add", "--all"])
+    subprocess.call(["git", "commit", "-m", '"{}"'.format(automated_message)])
     subprocess.call(["git", "tag", "-a", version, "-m", nice_message])
     subprocess.call(["git", "push", "-u", "origin", "master"])
 
