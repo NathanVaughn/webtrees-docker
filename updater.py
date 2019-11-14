@@ -67,7 +67,7 @@ def push_changes(version, prerelease):
     subprocess.call(["git", "add", "--all"])
     subprocess.call(["git", "commit", "-m", '"{}"'.format(automated_message)])
     subprocess.call(["git", "tag", "-a", version, "-m", nice_message])
-    subprocess.call(["git", "push", "-u", "origin", "master", "--force"])
+    subprocess.call(["git", "push", "-u", "origin", "master"])
 
     g = Github(os.environ["GITHUB_TOKEN"])
     repo = g.get_repo(MY_REPO)

@@ -2,7 +2,7 @@ name: Update Dockerfile
 
 on:
   schedule:
-    - cron:  '0 1 * * *'
+    - cron:  '0 2 * * *'
 
 jobs:
   main:
@@ -12,6 +12,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@master
+      with:
+        ref: master
     - name: Install setuptools
       run: sudo apt install python3-setuptools
     - name: Install pip requirements
