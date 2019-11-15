@@ -17,8 +17,9 @@ An example `docker-compose.yml` file is provided for reference.
 
 You can launch the example with `docker-compose up -d`.
 
-Once you start the container, you can visit http://localhost:1000/setup.php and
-begin the setup wizard.
+Once you start the container, you can visit
+[http://localhost:1000/setup.php](http://localhost:1000/setup.php) and begin the
+[setup wizard](https://wiki.webtrees.net/en/Installation#Server_configuration_check).
 
 ### Network
 
