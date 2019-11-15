@@ -1,11 +1,13 @@
-# Docker Image for [Webtrees](https://www.webtrees.net/index.php/en/)
+# Docker Image for [webtrees](https://www.webtrees.net/index.php/en/)
 
 [![](https://img.shields.io/docker/cloud/build/nathanvaughn/webtrees.svg?style=popout)](https://hub.docker.com/r/nathanvaughn/webtrees)
 [![](https://images.microbadger.com/badges/image/nathanvaughn/webtrees.svg)](https://microbadger.com/images/nathanvaughn/webtrees)
 [![](https://images.microbadger.com/badges/version/nathanvaughn/webtrees.svg)](https://microbadger.com/images/nathanvaughn/webtrees)
 [![](https://images.microbadger.com/badges/license/nathanvaughn/webtrees.svg)](https://microbadger.com/images/nathanvaughn/webtrees)
 
-This is an up-to-date Docker image for webtrees served over HTTP, designed to be put behind a reverse proxy such as Cloudflare.
+This is an up-to-date Docker image for
+[webtrees](https://github.com/fisharebest/webtrees) served over HTTP,
+designed to be put behind a reverse proxy such as Cloudflare.
 
 ## Usage
 
@@ -15,7 +17,8 @@ An example `docker-compose.yml` file is provided for reference.
 
 You can launch the example with `docker-compose up -d`.
 
-Once you start the container, you can visit http://localhost:1000/setup.php and begin the setup wizard.
+Once you start the container, you can visit http://localhost:1000/setup.php and
+begin the setup wizard.
 
 ### Network
 
@@ -34,7 +37,8 @@ The image mounts:
   - `/var/www/webtrees/data/`
   - `/var/www/webtrees/media/`
 
-If you want to add custom themes, you can also mount the `/var/www/webtrees/themes/` directory.
+If you want to add custom themes, you can also mount the
+`/var/www/webtrees/themes/` directory.
 
 Example `docker-compose`:
 
@@ -65,10 +69,44 @@ You will need a separate container for this.
 
 ## Tags
 
+### Specific Versions
 Each stable, beta, and alpha release version of webtrees
 produces a version-tagged build of the Docker container.
-You can also use the `latest` tag to use the latest stable version.
 
+Example:
+
+```yml
+image: nathanvaughn/webtrees:1.7.15
+```
+
+### Latest
+Currently, the tags `latest` and `latest-beta` are available for the latest
+stable and beta versions of webtrees, respectively.
+
+Example:
+
+```yml
+image: nathanvaughn/webtrees:latest-beta
+```
+
+## Reverse Proxy Issues
+
+webtrees does not like running behind a reverse proxy, and depending on your setup,
+you may need to adjust some database values manually.
+
+For example, if you are accessing webtrees via a reverse proxy serving content
+over HTTPS, but using this HTTP container, you would need to make the following
+changes in your database:
+
+```sql
+mysql -u webtrees -p
+
+use webtrees;
+update wt_site_setting set setting_value='https://example.com/login.php' where setting_name='LOGIN_URL';
+update wt_site_setting set setting_value='http://example.com/' where setting_name='SERVER_URL';
+quit;
+```
 
 ## Inspiration
-This is heavily based off [solidnerd/docker-bookstack](https://github.com/solidnerd/docker-bookstack).
+The Dockerfile is heavily based off
+[solidnerd/docker-bookstack](https://github.com/solidnerd/docker-bookstack).
