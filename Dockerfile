@@ -4,7 +4,7 @@ ENV WEBTREES_VERSION=1.7.15
 ENV WEBTREES_HOME="/var/www/webtrees"
 
 RUN apt-get update && apt-get install -y git wget zlib1g-dev libfreetype6-dev libjpeg62-turbo-dev libmcrypt-dev libpng-dev wget libldap2-dev libtidy-dev\
-   && docker-php-ext-install pdo pdo_mysql \
+   && docker-php-ext-install pdo pdo_mysql zip \
    && docker-php-ext-configure gd --with-freetype-dir=usr/include/ --with-jpeg-dir=/usr/include/ \
    && docker-php-ext-install gd \
    && wget https://github.com/fisharebest/webtrees/archive/${WEBTREES_VERSION}.tar.gz -O webtrees.tar.gz \
