@@ -70,6 +70,12 @@ You will need a separate container for this.
 
 ## Tags
 
+> **:rotating_light::warning: WARNING :warning::rotating_light:**
+If you use the **beta** version of webtrees, you will ***NOT*** be able to use the
+stable version again. The database schema between the stable and beta versions are
+very different, and this is a one-way operation. Make a full backup before choosing
+to try the beta version of webtrees so that you can roll back if needed.
+
 ### Specific Versions
 Each stable, beta, and alpha release version of webtrees
 produces a version-tagged build of the Docker container.
