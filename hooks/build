@@ -6,12 +6,15 @@ echo "Build hook running"
 echo "Tags being built: $DOCKER_TAG"
 
 IFS=',' read -ra tags <<< "$DOCKER_TAG"
-
-docker build --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
-             --build-arg VCS_REF=`git rev-parse --short HEAD` .
+TAG_COMMAND=""
 
 for tag in "${tags[@]}"
 do
-    echo "docker tag $DOCKER_REPO $DOCKER_REPO:$tag"
-    docker tag $DOCKER_REPO $DOCKER_REPO:$tag
+    TAG_COMMAND="$TAG_COMMAND -t $DOCKER_REPO:$tag"
 done
+
+echo "Tagging with: $TAG_COMMAND"
+
+docker build --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` \
+             --build-arg VCS_REF=`git rev-parse --short HEAD` \
+             $TAG_COMMAND .
