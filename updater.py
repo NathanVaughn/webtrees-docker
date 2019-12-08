@@ -65,7 +65,7 @@ def push_changes(version, prerelease):
     print(nice_message)
 
     subprocess.call(["git", "add", "--all"])
-    subprocess.call(["git", "commit", "-m", '"{}"'.format(automated_message)])
+    subprocess.call(["git", "commit", "-m", automated_message])
     subprocess.call(["git", "tag", "-a", version, "-m", nice_message])
     subprocess.call(["git", "push", "origin", "master"])
 
