@@ -11,7 +11,7 @@ WEBTREES_REPO = "fisharebest/webtrees"
 MY_REPO = os.environ["GITHUB_REPOSITORY"]
 
 
-def get_latest_versions(repo, number=3):
+def get_latest_versions(repo, number=5):
     url = "https://api.github.com/repos/{}/releases".format(repo)
     data = urllib.request.urlopen(url)
     json_data = json.loads(data.read().decode())
