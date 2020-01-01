@@ -120,7 +120,7 @@ def main():
         version_number = version["name"]
 
         # check if version is a forced one
-        if args.forced and if any(v == version_number for v in args.forced):
+        if args.forced and any(v == version_number for v in args.forced):
             # if not, add to list of missing versions
             print("Version {} forcefully added.".format(version_number))
             missing_versions.append(version)
