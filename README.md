@@ -72,7 +72,7 @@ You will need a separate container for this.
 
 > **🚨⚠ WARNING ⚠🚨**
 If you use the **beta** version of webtrees, you will ***NOT*** be able to use the
-stable version again. The database schema between the stable and beta versions are
+1.X.X stable version again. The database schema between the stable and beta versions are
 very different, and this is a one-way operation. Make a full backup before choosing
 to try the beta version of webtrees so that you can roll back if needed.
 

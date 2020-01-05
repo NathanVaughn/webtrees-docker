@@ -106,7 +106,7 @@ def create_release(repo, version, prerelease):
 def main():
     # allow user to pass list of versions to force re-push
     parser = argparse.ArgumentParser()
-    parser.add_argument('--forced', type=str, nargs='*')
+    parser.add_argument("--forced", type=str, nargs="*")
     args = parser.parse_args()
 
     # get the latest versions of each repo
