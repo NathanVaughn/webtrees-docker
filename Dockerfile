@@ -3,8 +3,8 @@ FROM php:7.3.15-apache-stretch
 ENV WEBTREES_VERSION=2.0.2
 ENV WEBTREES_HOME="/var/www/webtrees"
 
-RUN apt-get update && apt-get install -y git wget unzip zlib1g-dev libfreetype6-dev libjpeg62-turbo-dev libmcrypt-dev libpng-dev libldap2-dev libtidy-dev libzip-dev --no-install-recommends\
-   && docker-php-ext-install pdo pdo_mysql zip \
+RUN apt-get update && apt-get install -y git wget g++ unzip zip zlib1g-dev libfreetype6-dev libjpeg62-turbo-dev libmcrypt-dev libpng-dev libldap2-dev libtidy-dev libzip-dev libicu-dev --no-install-recommends\
+   && docker-php-ext-install pdo_mysql zip intl \
    && docker-php-ext-configure gd --with-freetype-dir=usr/include/ --with-jpeg-dir=/usr/include/ \
    && docker-php-ext-install gd \
    && wget https://github.com/fisharebest/webtrees/releases/download/${WEBTREES_VERSION}/webtrees-${WEBTREES_VERSION}.zip -O webtrees.zip \
