@@ -93,11 +93,11 @@ def commit_changes(repo, version):
     )
 
 
-def create_release(repo, version, prerelease):
+def create_release(repo, version, prerelease, url):
     repo.create_git_release(
         version,
         version,
-        "Automated release for webtrees version {}".format(version),
+        "Automated release for webtrees version {}: {}".format(version, url),
         draft=False,
         prerelease=prerelease,
     )
@@ -107,11 +107,12 @@ def main():
     # allow user to pass list of versions to force re-push
     parser = argparse.ArgumentParser()
     parser.add_argument("--forced", type=str, nargs="*")
+    parser.add_argument("--dry", action="store_true")
     args = parser.parse_args()
 
     # get the latest versions of each repo
     webtrees_versions = get_latest_versions(WEBTREES_REPO)
-    my_versions = get_latest_versions(MY_REPO)
+    my_versions = get_latest_versions(MY_REPO, 20)
 
     missing_versions = []
 
@@ -136,7 +137,7 @@ def main():
             print("Version {} found.".format(version_number))
 
     # if there are missing versions, process them
-    if missing_versions:
+    if missing_versions and not args.dry:
         if ACTION:
             # get environment variable for token
             TOKEN = os.environ["GITHUB_TOKEN"]
@@ -151,6 +152,7 @@ def main():
         for version in missing_versions:
             version_number = version["name"]
             version_prerelease = version["prerelease"]
+            version_url = version["html_url"]
 
             if args.forced:
                 # delete an existing release
@@ -171,7 +173,7 @@ def main():
 
             # create a release on github
             print("Creating release")
-            create_release(repo, version_number, version_prerelease)
+            create_release(repo, version_number, version_prerelease, version_url)
 
     sys.exit(0)
 

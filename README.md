@@ -1,4 +1,4 @@
-# Docker Image for [webtrees](https://www.webtrees.net/index.php/en/)
+# Docker Image for [webtrees](https://webtrees.github.io/)
 
 [![](https://img.shields.io/docker/cloud/build/nathanvaughn/webtrees.svg?style=popout)](https://hub.docker.com/r/nathanvaughn/webtrees)
 [![](https://images.microbadger.com/badges/image/nathanvaughn/webtrees.svg)](https://microbadger.com/images/nathanvaughn/webtrees)
@@ -95,6 +95,14 @@ Example:
 ```yml
 image: nathanvaughn/webtrees:latest-beta
 ```
+
+## Issues
+
+New releases of the Dockerfile are automatically generated from upstream
+webtrees versions. This means a human does not vette every release. While
+I try to stay on top of things, sometimes breaking issues do occur. If you
+have any, please feel free to fill out an
+[issue](https://github.com/NathanVaughn/webtrees-docker/issues).
 
 ## Reverse Proxy Issues
 
