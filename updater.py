@@ -93,11 +93,11 @@ def commit_changes(repo, version):
     )
 
 
-def create_release(repo, version, prerelease):
+def create_release(repo, version, prerelease, url):
     repo.create_git_release(
         version,
         version,
-        "Automated release for webtrees version {}".format(version),
+        "Automated release for webtrees version {}: {}".format(version, url),
         draft=False,
         prerelease=prerelease,
     )
@@ -152,6 +152,7 @@ def main():
         for version in missing_versions:
             version_number = version["name"]
             version_prerelease = version["prerelease"]
+            version_url = version["html_url"]
 
             if args.forced:
                 # delete an existing release
@@ -172,7 +173,7 @@ def main():
 
             # create a release on github
             print("Creating release")
-            create_release(repo, version_number, version_prerelease)
+            create_release(repo, version_number, version_prerelease, version_url)
 
     sys.exit(0)
 
