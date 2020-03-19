@@ -107,11 +107,12 @@ def main():
     # allow user to pass list of versions to force re-push
     parser = argparse.ArgumentParser()
     parser.add_argument("--forced", type=str, nargs="*")
+    parser.add_argument("--dry", action="store_true")
     args = parser.parse_args()
 
     # get the latest versions of each repo
     webtrees_versions = get_latest_versions(WEBTREES_REPO)
-    my_versions = get_latest_versions(MY_REPO)
+    my_versions = get_latest_versions(MY_REPO, 20)
 
     missing_versions = []
 
@@ -136,7 +137,7 @@ def main():
             print("Version {} found.".format(version_number))
 
     # if there are missing versions, process them
-    if missing_versions:
+    if missing_versions and not args.dry:
         if ACTION:
             # get environment variable for token
             TOKEN = os.environ["GITHUB_TOKEN"]
