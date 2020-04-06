@@ -16,8 +16,8 @@ jobs:
         ref: master
     - name: Prepare repository
       run: git checkout "${GITHUB_REF:11}"
-    - name: Install setuptools
-      run: sudo apt install python3-setuptools
+    #- name: Install setuptools
+    #  run: sudo apt install python3-setuptools
     - name: Install pip requirements
       run: pip3 install -r requirements.txt
     - name: Run updater script
