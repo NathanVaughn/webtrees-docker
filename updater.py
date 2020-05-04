@@ -62,14 +62,14 @@ def delete_tag(repo, name):
 
 
 def update_dockerfile(version):
-    # phrase we're looking for
-    phrase = "ENV WEBTREES_VERSION="
-
     # read the data of the file
     with open("Dockerfile", "r") as f:
         data = f.readlines()
     # write out the file line by line
     with open("Dockerfile", "w") as f:
+        # phrase we're looking for
+        phrase = "ENV WEBTREES_VERSION="
+
         for line in data:
             if line.startswith(phrase):
                 # if the line starts with the desired phrase, overwrite
