@@ -1,6 +1,6 @@
 FROM php:7.3.16-apache-stretch
 
-ENV WEBTREES_VERSION=2.0.3
+ENV WEBTREES_VERSION=1.7.17
 ENV WEBTREES_HOME="/var/www/webtrees"
 
 RUN apt-get update && apt-get install -y git wget g++ unzip zip zlib1g-dev libfreetype6-dev libjpeg62-turbo-dev libmcrypt-dev libpng-dev libldap2-dev libtidy-dev libzip-dev libicu-dev --no-install-recommends\
