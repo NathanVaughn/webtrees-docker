@@ -14,14 +14,28 @@ jobs:
       uses: actions/checkout@master
       with:
         ref: master
+
+    - name: Cache Pip
+      uses: actions/cache@v1
+      id: cache-pip
+      with:
+        path: ~/.cache/pip
+        key: pip-${{ hashFiles('**/requirements.txt') }}
+
     - name: Prepare repository
       run: git checkout "${GITHUB_REF:11}"
+
     - name: Update apt
       run: sudo apt update
-    - name: Install setuptools
-      run: sudo apt install python3-setuptools -y
+
+    - name: Setup Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+
     - name: Install pip requirements
       run: pip3 install -r requirements.txt
+
     - name: Run updater script
       run: python3 updater.py
       env:
