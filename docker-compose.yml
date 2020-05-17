@@ -18,7 +18,7 @@ services:
       MYSQL_DATABASE: "webtrees"
       MYSQL_USER: "webtrees"
       MYSQL_ROOT_PASSWORD: "badpassword"
-      MYSQL_USER_PASSWORD: "badpassword"
+      MYSQL_PASSWORD: "badpassword"
     image: mariadb:latest
     restart: unless-stopped
     volumes:
