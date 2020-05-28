@@ -90,7 +90,9 @@ environment:
 ***Note:*** This will only take into effect the *second* time you start the container.
 This cannot be enabled in webtrees until you have completed the setup process.
 Therefore, start the container for the first time, complete the setup, then restart
-the container.
+the container. Additionally, if you have migrated an existing V1 webtrees installation,
+you may need to manually add the `base_url` field to the `config.ini.php` file.
+See the link above for more info.
 
 ## Tags
 
