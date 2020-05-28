@@ -127,15 +127,25 @@ def get_tags(version_number):
     return [tag, version_number]
 
 
-def build_image(tags):
+def build_image(tags, basic=False):
     """Build the Docker image"""
-    tagging = " ".join(["--tag {}".format(tag) for tag in tags])
+    tagging = " ".join(["--tag {}:{}".format(CONTAINER, tag) for tag in tags])
 
-    build_command = 'docker buildx build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --push --platform {} {}'.format(
-        PLATFORMS, tagging
-    )
+    if not basic:
+        build_command = 'docker buildx build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --push --platform {} {}'.format(
+            PLATFORMS, tagging
+        )
+    else:
+        build_command = 'docker build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` {}'.format(
+            PLATFORMS, tagging
+        )
+
     print(build_command)
     subprocess.run(build_command, shell=True)
+
+    if basic:
+        for tag in tags:
+            subprocess.run("docker push {}:{}".format(CONTAINER, tag), shell=True)
 
 
 def main():
@@ -143,6 +153,7 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--forced", type=str, nargs="*")
     parser.add_argument("--dry", action="store_true")
+    parser.add_argument("--basic", action="store_true")
     args = parser.parse_args()
 
     # get the latest versions of each repo
@@ -214,7 +225,7 @@ def main():
             # build and push image
             print("Building and pushing image")
             tags = get_tags(version_number)
-            build_image(tags)
+            build_image(tags, basic=args.basic)
 
     sys.exit(0)
 
