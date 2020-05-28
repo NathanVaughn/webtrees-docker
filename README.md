@@ -1,13 +1,15 @@
-# Docker Image for [webtrees](https://webtrees.github.io/)
+# Docker Image for [webtrees](https://webtrees.net/)
 
-[![](https://img.shields.io/docker/cloud/build/nathanvaughn/webtrees.svg?style=popout)](https://hub.docker.com/r/nathanvaughn/webtrees)
-[![](https://images.microbadger.com/badges/image/nathanvaughn/webtrees.svg)](https://microbadger.com/images/nathanvaughn/webtrees)
-[![](https://images.microbadger.com/badges/version/nathanvaughn/webtrees.svg)](https://microbadger.com/images/nathanvaughn/webtrees)
-[![](https://images.microbadger.com/badges/license/nathanvaughn/webtrees.svg)](https://microbadger.com/images/nathanvaughn/webtrees)
 
-This is an up-to-date Docker image for
+[![](https://img.shields.io/docker/cloud/build/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
+[![](https://img.shields.io/docker/v/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
+[![](https://img.shields.io/docker/image-size/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
+[![](https://img.shields.io/docker/pulls/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
+[![](https://img.shields.io/github/license/nathanvaughn/webtrees-docker)](https://github.com/NathanVaughn/webtrees-docker)
+
+This is a basic, up-to-date Docker image for
 [webtrees](https://github.com/fisharebest/webtrees) served over HTTP,
-designed to be put behind a reverse proxy such as Cloudflare.
+designed to be put behind a reverse proxy such as CloudFlare.
 
 ## Usage
 
@@ -18,7 +20,7 @@ An example `docker-compose.yml` file is provided for reference.
 You can launch the example with `docker-compose up -d`.
 
 Once you start the container, you can visit
-[http://localhost:1000/setup.php](http://localhost:1000/setup.php) and begin the
+[http://localhost:1000/](http://localhost:1000/) and begin the
 [setup wizard](https://wiki.webtrees.net/en/Installation#Server_configuration_check).
 
 ### Network
@@ -60,24 +62,46 @@ volumes:
     driver: local
 ```
 
-### MySQL
+### Database
 
-webtrees requires a MySQL (or compatible equivalent) database.
+webtrees [recommends](https://webtrees.net/install/requirements/)
+a MySQL (or compatible equivalent) database.
 You will need a separate container for this.
 
 - [MariaDB](https://hub.docker.com/_/mariadb)
 - [MySQL](https://hub.docker.com/_/mysql)
 
+PostgreSQL and SQLite are additionally both supported by webtrees and this image, but
+are not recommended. This image currently does not support Microsoft SQL Server.
+
+### Pretty URLS
+
+If you would like to enable [pretty URLs](https://webtrees.net/faq/urls/),
+set the environment variable `PRETTY_URLS` to any value.
+This can be toggled at any time.
+
+Example `docker-compose`:
+
+```yml
+environment:
+  PRETTY_URLS: "1"
+```
+
+***Note:*** This will only take into effect the *second* time you start the container.
+This cannot be enabled in webtrees until you have completed the setup process.
+Therefore, start the container for the first time, complete the setup, then restart
+the container.
+
 ## Tags
 
 > **🚨⚠ WARNING ⚠🚨**
-If you use the **beta** version of webtrees, you will ***NOT*** be able to use the
-1.X.X stable version again. The database schema between the stable and beta versions are
-very different, and this is a one-way operation. Make a full backup before choosing
-to try the beta version of webtrees so that you can roll back if needed.
+If you use the 2.X.X or **beta** versions of webtrees,
+you will ***NOT*** be able to use the
+1.X.X version again. The database schema between these versions are
+very different, and this is a one-way operation.
 
 ### Specific Versions
-Each stable, beta, and alpha release version of webtrees
+Each stable, legacy, beta, and alpha release version of webtrees
 produces a version-tagged build of the Docker container.
 
 Example:
@@ -110,7 +134,7 @@ webtrees does not like running behind a reverse proxy, and depending on your set
 you may need to adjust some database values manually.
 
 For example, if you are accessing webtrees via a reverse proxy serving content
-over HTTPS, but using this HTTP container, you would need to make the following
+over HTTPS, but using this HTTP container, you might need to make the following
 changes in your database:
 
 ```sql
@@ -121,6 +145,8 @@ update wt_site_setting set setting_value='https://example.com/login.php' where s
 update wt_site_setting set setting_value='http://example.com/' where setting_name='SERVER_URL';
 quit;
 ```
+
+For more info, see [this](https://webtrees.net/admin/proxy/).
 
 ## Inspiration
 The Dockerfile is heavily based off

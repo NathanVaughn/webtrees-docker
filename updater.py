@@ -2,6 +2,7 @@ import argparse
 import getpass
 import json
 import os
+import subprocess
 import sys
 import urllib.request
 
@@ -13,8 +14,12 @@ ACTION = json.loads(os.getenv("GITHUB_ACTIONS", default="false").lower())
 WEBTREES_REPO = "fisharebest/webtrees"
 MY_REPO = os.getenv("GITHUB_REPOSITORY", default="nathanvaughn/webtrees-docker")
 
+CONTAINER = "nathanvaughn/webtrees"
+PLATFORMS = os.getenv("BUILDX_PLATFORMS", "linux/amd64,linux/arm/v7,linux/arm64")
+
 
 def get_latest_versions(repo, number=5):
+    """Get latest versions from a repository releases"""
     # build url
     url = "https://api.github.com/repos/{}/releases".format(repo)
     # download data
@@ -27,6 +32,7 @@ def get_latest_versions(repo, number=5):
 
 
 def delete_release(repo, name):
+    """Delete a release from a repository"""
     # get all releses
     releases = repo.get_releases()
     for release in releases:
@@ -37,6 +43,7 @@ def delete_release(repo, name):
 
 
 def delete_tag(repo, name):
+    """Delete a tag from a repository"""
     name = "tags/{}".format(name)
 
     try:
@@ -62,6 +69,7 @@ def delete_tag(repo, name):
 
 
 def update_dockerfile(version):
+    """Update the Dockerfile with a new webtrees version number"""
     # read the data of the file
     with open("Dockerfile", "r") as f:
         data = f.readlines()
@@ -79,6 +87,7 @@ def update_dockerfile(version):
 
 
 def commit_changes(repo, version):
+    """Commit and push changes to a repository"""
     # get the blob SHA of the file we're updating
     sha = repo.get_contents("Dockerfile").sha
     # read the local contents in
@@ -94,6 +103,7 @@ def commit_changes(repo, version):
 
 
 def create_release(repo, version, prerelease, url):
+    """Create a release for a repository"""
     repo.create_git_release(
         version,
         version,
@@ -101,6 +111,31 @@ def create_release(repo, version, prerelease, url):
         draft=False,
         prerelease=prerelease,
     )
+
+
+def get_tags(version_number):
+    """Get comma separated tags for a version number"""
+    if "alpha" in version_number:
+        tag = "latest-alpha"
+    elif "beta" in version_number:
+        tag = "latest-beta"
+    elif version_number.startswith("1."):
+        tag = "latest-legacy"
+    else:
+        tag = "latest"
+
+    return [tag, version_number]
+
+
+def build_image(tags):
+    """Build the Docker image"""
+    tagging = " ".join(["--tag {}".format(tag) for tag in tags])
+
+    build_command = 'docker buildx build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --push --platform {} {}'.format(
+        PLATFORMS, tagging
+    )
+    print(build_command)
+    subprocess.run(build_command, shell=True)
 
 
 def main():
@@ -162,6 +197,7 @@ def main():
                 # also delete the tag
                 print("Deleting tag {}".format(version_number))
                 delete_tag(repo, version_number)
+                pass
 
             # update the Dockerfile
             print("Updating Dockerfile for version {}".format(version_number))
@@ -174,6 +210,11 @@ def main():
             # create a release on github
             print("Creating release")
             create_release(repo, version_number, version_prerelease, version_url)
+
+            # build and push image
+            print("Building and pushing image")
+            tags = get_tags(version_number)
+            build_image(tags)
 
     sys.exit(0)
 

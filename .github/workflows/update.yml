@@ -36,6 +36,13 @@ jobs:
     - name: Install pip requirements
       run: pip3 install -r requirements.txt
 
+    - name: Docker login
+      uses: azure/docker-login@v1
+      with:
+        login-server: index.docker.io
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
     - name: Run updater script
       run: python3 updater.py
       env:

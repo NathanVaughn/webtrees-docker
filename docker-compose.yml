@@ -4,6 +4,8 @@ services:
   app:
     depends_on:
       - db
+    environment:
+      PRETTY_URLS: "1"
     image: nathanvaughn/webtrees:latest
     ports:
       - 1000:80
