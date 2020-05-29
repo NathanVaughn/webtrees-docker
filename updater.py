@@ -137,7 +137,7 @@ def build_image(tags, basic=False):
         )
     else:
         build_command = 'docker build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` {}'.format(
-            PLATFORMS, tagging
+            tagging
         )
 
     print(build_command)
@@ -208,7 +208,6 @@ def main():
                 # also delete the tag
                 print("Deleting tag {}".format(version_number))
                 delete_tag(repo, version_number)
-                pass
 
             # update the Dockerfile
             print("Updating Dockerfile for version {}".format(version_number))

@@ -1,6 +1,5 @@
 # Docker Image for [webtrees](https://webtrees.net/)
 
-
 [![](https://img.shields.io/docker/cloud/build/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
 [![](https://img.shields.io/docker/v/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
 [![](https://img.shields.io/docker/image-size/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
@@ -37,8 +36,8 @@ Example `docker-compose`:
 ### Volumes
 
 The image mounts:
-  - `/var/www/webtrees/data/`
-  - `/var/www/webtrees/media/`
+- `/var/www/webtrees/data/`
+- `/var/www/webtrees/media/`
 
 If you want to add custom themes, you can also mount the
 `/var/www/webtrees/themes/` directory.
