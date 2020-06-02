@@ -16,7 +16,7 @@ jobs:
         ref: master
 
     - name: Cache Pip
-      uses: actions/cache@v1
+      uses: actions/cache@v2
       id: cache-pip
       with:
         path: ~/.cache/pip
