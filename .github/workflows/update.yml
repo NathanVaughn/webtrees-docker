@@ -23,9 +23,6 @@ jobs:
         path: ~/.cache/pip
         key: pip-${{ hashFiles('**/requirements.txt') }}
 
-    - name: Prepare repository
-      run: git checkout "${GITHUB_REF:11}"
-
     - name: Update apt
       run: sudo apt update
 
@@ -52,20 +49,14 @@ jobs:
         path: /tmp/.buildx-cache
         key: buildx
 
-    - name: Docker login
-      uses: azure/docker-login@v1
-      with:
-        login-server: index.docker.io
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    - name: docker login
+      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin docker.io
 
     - name: Create Builder
-      run: |
-        docker buildx create --name webtreesdockerbuilder
-        docker buildx use webtreesdockerbuilder
+      run: docker buildx create --use --name build --node build --driver-opt network=host
 
     - name: Run updater script
       run: python3 updater.py
       env:
-        PLATFORMS: ${{ steps.buildx.outputs.platforms }}
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        #BUILDX_PLATFORMS: ${{ steps.buildx.outputs.platforms }}
