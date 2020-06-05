@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
     - Dockerfile
+  repository_dispatch:
 
 jobs:
   build:
@@ -41,4 +42,4 @@ jobs:
 
     - name: Lint 3rd Party
       if: github.repository == 'nathanvaughn/webtrees-docker'
-      run: npm install -g dockerfilelint && dockerfilelint Dockerfile
+      run: npm install dockerfilelint && npx dockerfilelint Dockerfile
