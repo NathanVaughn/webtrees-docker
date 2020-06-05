@@ -1,12 +1,12 @@
 # Docker Image for [webtrees](https://webtrees.net/)
 
-[![](https://img.shields.io/docker/cloud/build/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
+[![](https://img.shields.io/docker/build/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
 [![](https://img.shields.io/docker/v/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
 [![](https://img.shields.io/docker/image-size/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
 [![](https://img.shields.io/docker/pulls/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
 [![](https://img.shields.io/github/license/nathanvaughn/webtrees-docker)](https://github.com/NathanVaughn/webtrees-docker)
 
-This is a basic, up-to-date Docker image for
+This is a basic, multi-architecture, up-to-date, Docker image for
 [webtrees](https://github.com/fisharebest/webtrees) served over HTTP,
 designed to be put behind a reverse proxy such as CloudFlare.
 

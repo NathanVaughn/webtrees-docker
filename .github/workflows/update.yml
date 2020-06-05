@@ -31,7 +31,7 @@ jobs:
       with:
         python-version: 3.8
 
-    - name: Install pip requirements
+    - name: Install pip Requirements
       run: pip3 install -r requirements.txt
 
     - name: Set up Docker Buildx
@@ -42,20 +42,20 @@ jobs:
         qemu-version: latest
         skip-cache: false
 
-    - name: Cache Docker layers
+    - name: Cache Docker Layers
       uses: actions/cache@v2
       id: cache
       with:
         path: /tmp/.buildx-cache
         key: buildx
 
-    - name: docker login
+    - name: Docker Login
       run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin docker.io
 
     - name: Create Builder
       run: docker buildx create --use --name build --node build --driver-opt network=host
 
-    - name: Run updater script
+    - name: Run Updater Script
       run: python3 updater.py
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
