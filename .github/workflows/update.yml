@@ -44,12 +44,24 @@ jobs:
         qemu-version: latest
         skip-cache: false
 
+    - name: Cache Docker layers
+      uses: actions/cache@v2
+      id: cache
+      with:
+        path: /tmp/.buildx-cache
+        key: buildx
+
     - name: Docker login
       uses: azure/docker-login@v1
       with:
         login-server: index.docker.io
         username: ${{ secrets.DOCKERHUB_USERNAME }}
         password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+    - name: Create Builder
+      run: |
+        docker buildx create --name webtreesdockerbuilder
+        docker buildx use webtreesdockerbuilder
 
     - name: Run updater script
       run: python3 updater.py
