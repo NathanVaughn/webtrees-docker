@@ -28,7 +28,7 @@ jobs:
 
     - name: Lint 1st Party
       uses: luke142367/Docker-Lint-Action@master
-      if: github.repository == 'nathanvaughn/webtrees'
+      if: github.repository == 'nathanvaughn/webtrees-docker'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         TARGET: Dockerfile
@@ -37,9 +37,9 @@ jobs:
     # so, run the underlying linter without the fancy inline diff annotations
 
     - name: Setup NPM
-      if: github.repository == 'nathanvaughn/webtrees-docker'
+      if: github.repository != 'nathanvaughn/webtrees-docker'
       uses: actions/setup-node@v2.0.0
 
     - name: Lint 3rd Party
-      if: github.repository == 'nathanvaughn/webtrees-docker'
+      if: github.repository != 'nathanvaughn/webtrees-docker'
       run: npm install dockerfilelint && npx dockerfilelint Dockerfile
