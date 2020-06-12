@@ -4,7 +4,7 @@ echo "Setting folder permissions for uploads"
 chown -R www-data:www-data data && chmod -R 775 data
 chown -R www-data:www-data media && chmod -R 775 media
 
-CONFIG_FILE="/var/www/webtrees/data/config.ini.php"
+CONFIG_FILE="data/config.ini.php"
 
 if [ -f "$CONFIG_FILE" ]
 then
