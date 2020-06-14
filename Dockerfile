@@ -7,7 +7,7 @@ RUN apt-get update && apt-get install -y git wget g++ unzip zip zlib1g-dev libfr
    && pecl install imagick sqlsrv pdo_sqlsrv \
    && docker-php-ext-enable pdo_sqlsrv imagick \
    && docker-php-ext-configure gd --with-freetype --with-jpeg \
-   && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql zip intl gd \
+   && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql zip intl gd exif \
    && wget -q https://github.com/fisharebest/webtrees/releases/download/${WEBTREES_VERSION}/webtrees-${WEBTREES_VERSION}.zip -O webtrees.zip \
    && unzip -q webtrees.zip -d /var/www/ && rm webtrees.zip  \
    && chown -R www-data:www-data $WEBTREES_HOME \
