@@ -213,14 +213,14 @@ def main():
             print("Updating Dockerfile for version {}".format(version_number))
             update_dockerfile(version_number)
 
+            # commit the changes to the file
+            print("Committing changes")
+            commit_changes(repo, version_number)
+
             # build and push image
             print("Building and pushing image")
             tags = get_tags(version_number)
             build_image(tags, basic=args.basic)
-
-            # commit the changes to the file
-            print("Committing changes")
-            commit_changes(repo, version_number)
 
             # create a release on github
             print("Creating release")
