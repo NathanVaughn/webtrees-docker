@@ -141,7 +141,7 @@ def build_image(tags, basic=False):
         )
 
     print(build_command)
-    subprocess.run(build_command, shell=True)
+    subprocess.run(build_command, shell=True, check=True)
 
     if basic:
         for tag in tags:
@@ -217,14 +217,14 @@ def main():
             print("Committing changes")
             commit_changes(repo, version_number)
 
-            # create a release on github
-            print("Creating release")
-            create_release(repo, version_number, version_prerelease, version_url)
-
             # build and push image
             print("Building and pushing image")
             tags = get_tags(version_number)
             build_image(tags, basic=args.basic)
+
+            # create a release on github
+            print("Creating release")
+            create_release(repo, version_number, version_prerelease, version_url)
 
     sys.exit(0)
 

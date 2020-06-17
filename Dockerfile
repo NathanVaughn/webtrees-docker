@@ -3,9 +3,9 @@ FROM php:7.4-apache
 ENV WEBTREES_VERSION=2.0.5
 ENV WEBTREES_HOME="/var/www/webtrees"
 
-RUN apt-get update && apt-get install -y git wget g++ unzip zip zlib1g-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev libmcrypt-dev libzip-dev libicu-dev libpq-dev libmagickwand-dev unixodbc-dev --no-install-recommends \
-   && pecl install imagick sqlsrv pdo_sqlsrv \
-   && docker-php-ext-enable pdo_sqlsrv imagick \
+RUN apt-get update && apt-get install -y git wget g++ unzip zip zlib1g-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev libmcrypt-dev libzip-dev libicu-dev libpq-dev libmagickwand-dev --no-install-recommends \
+   && pecl install imagick \
+   && docker-php-ext-enable imagick \
    && docker-php-ext-configure gd --with-freetype --with-jpeg \
    && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql zip intl gd exif \
    && wget -q https://github.com/fisharebest/webtrees/releases/download/${WEBTREES_VERSION}/webtrees-${WEBTREES_VERSION}.zip -O webtrees.zip \

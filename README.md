@@ -20,7 +20,7 @@ You can launch the example with `docker-compose up -d`.
 
 Once you start the container, you can visit
 [http://localhost:1000/](http://localhost:1000/) and begin the
-[setup wizard](https://wiki.webtrees.net/en/Installation#Server_configuration_check).
+[setup wizard](https://i.imgur.com/rw70cgW.jpg).
 
 ### Network
 
@@ -71,7 +71,9 @@ You will need a separate container for this.
 - [MySQL](https://hub.docker.com/_/mysql)
 
 PostgreSQL and SQLite are additionally both supported by webtrees and this image, but
-are not recommended. This image currently does not support Microsoft SQL Server.
+are not recommended. This image does not support Microsoft SQL Server, in order
+to support multiple architectures. See issue:
+[microsoft/msphpsql#441](https://github.com/microsoft/msphpsql/issues/441#issuecomment-310237200)
 
 ### Pretty URLS
 
@@ -92,6 +94,12 @@ Therefore, start the container for the first time, complete the setup, then rest
 the container. Additionally, if you have migrated an existing V1 webtrees installation,
 you may need to manually add the `base_url` field to the `config.ini.php` file.
 See the link above for more info.
+
+### ImageMagick
+
+`ImageMagick` is included in this image to speed up
+[thumbnail creation](https://webtrees.net/faq/thumbnails/).
+webtrees will automatically prefer it over `gd` with no configuration.
 
 ## Tags
 
