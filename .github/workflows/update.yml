@@ -40,7 +40,6 @@ jobs:
       with:
         buildx-version: latest
         qemu-version: latest
-        skip-cache: false
 
     - name: Cache Docker Layers
       uses: actions/cache@v2
