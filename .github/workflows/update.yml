@@ -9,9 +9,9 @@ jobs:
   main:
 
     runs-on: ubuntu-latest
-    
+
     steps:
-    - name: Checkout code
+    - name: Checkout Code
       uses: actions/checkout@master
       with:
         ref: master
@@ -23,9 +23,6 @@ jobs:
         path: ~/.cache/pip
         key: pip-${{ hashFiles('**/requirements.txt') }}
 
-    - name: Update apt
-      run: sudo apt update
-
     - name: Setup Python 3.8
       uses: actions/setup-python@v2.0.1
       with:
@@ -34,28 +31,49 @@ jobs:
     - name: Install pip Requirements
       run: pip3 install -r requirements.txt
 
+    - name: Check For Updates
+      run: python3 updater.py --dry
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    # Only run the following if update(s) are needed
+    # Set by the 'WT_UPDATE' environment variable being 'true'
+
+    - name: Determine Week
+      if: env.WT_UPDATE == 'true'
+      run: echo "::set-env name=WEEK::$(date +%V)"
+
+    - name: Cache Docker Layers
+      if: env.WT_UPDATE == 'true'
+      uses: actions/cache@v2
+      with:
+        path: /tmp/.buildx-cache
+        key: buildx-${ WEEK }
+
     - name: Set up Docker Buildx
-      id: buildx
       uses: crazy-max/ghaction-docker-buildx@v3.1.0
       with:
         buildx-version: latest
         qemu-version: latest
 
-    - name: Cache Docker Layers
-      uses: actions/cache@v2
-      id: cache
-      with:
-        path: /tmp/.buildx-cache
-        key: buildx
-
-    - name: Docker Login
-      run: echo "${{ secrets.DOCKERHUB_PASSWORD }}" | docker login --username "${{ secrets.DOCKERHUB_USERNAME }}" --password-stdin docker.io
-
     - name: Create Builder
+      if: env.WT_UPDATE == 'true'
       run: docker buildx create --use --name build --node build --driver-opt network=host
 
+    - name: Dockerhub Login
+      if: env.WT_UPDATE == 'true'
+      env:
+        DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        DOCKERHUB_PASSWORD: ${{ secrets.DOCKERHUB_PASSWORD }}
+      run: echo "${ DOCKERHUB_PASSWORD }" | docker login --username "${ DOCKERHUB_USERNAME }" --password-stdin
+
     - name: Run Updater Script
+      if: env.WT_UPDATE == 'true'
       run: python3 updater.py
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         #BUILDX_PLATFORMS: ${{ steps.buildx.outputs.platforms }}
+
+    - name: Clear Dockerhub Credentials
+      if: always()
+      run: rm -f ${HOME}/.docker/config.json
