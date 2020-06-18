@@ -1,4 +1,4 @@
-name: Update Dockerfile
+name: Check and Push Updates
 
 on:
   schedule:
