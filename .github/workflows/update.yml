@@ -32,7 +32,7 @@ jobs:
       run: pip3 install -r requirements.txt
 
     - name: Check For Updates
-      run: python3 updater.py --dry
+      run: echo "::set-env name=WT_UPDATE::$(python3 updater.py --dry)"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
@@ -51,6 +51,7 @@ jobs:
         key: buildx-${ WEEK }
 
     - name: Set up Docker Buildx
+      if: env.WT_UPDATE == 'true'
       uses: crazy-max/ghaction-docker-buildx@v3.1.0
       with:
         buildx-version: latest

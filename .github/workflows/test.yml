@@ -4,7 +4,6 @@ on:
   pull_request:
     paths:
     - Dockerfile
-  repository_dispatch:
 
 jobs:
   build:

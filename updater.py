@@ -227,13 +227,12 @@ def main():
             create_release(repo, version_number, version_prerelease, version_url)
 
     elif missing_versions and args.dry:
-        os.environ["WT_UPDATE"] = 'true'
+        print('true')
 
     else:
-        os.environ["WT_UPDATE"] = 'false'
-
-    sys.exit(0)
+        print('false')
 
 
 if __name__ == "__main__":
     main()
+    sys.exit(0)
