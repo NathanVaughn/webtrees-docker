@@ -151,9 +151,10 @@ def build_image(tags, basic=False):
 def main():
     # allow user to pass list of versions to force re-push
     parser = argparse.ArgumentParser()
-    parser.add_argument("--forced", type=str, nargs="*")
-    parser.add_argument("--dry", action="store_true")
-    parser.add_argument("--basic", action="store_true")
+    parser.add_argument("--forced", type=str, nargs="*") # forecfully add specific versions
+    parser.add_argument("--dry", action="store_true") # only perform a dry run
+    parser.add_argument("--check", action="store_true") # only check for updates and output true/false
+    parser.add_argument("--basic", action="store_true") # only x86 builds
     args = parser.parse_args()
 
     # get the latest versions of each repo
@@ -169,21 +170,24 @@ def main():
         # check if version is a forced one
         if args.forced and any(v == version_number for v in args.forced):
             # if not, add to list of missing versions
-            print("Version {} forcefully added.".format(version_number))
+            if not args.check:
+                print("Version {} forcefully added.".format(version_number))
             missing_versions.append(version)
 
         # check if the version number exists in any of the releases from my repo
         elif not any(v["name"] == version_number for v in my_versions):
             # if not, add to list of missing versions
-            print("Version {} missing.".format(version_number))
+            if not args.check:
+                print("Version {} missing.".format(version_number))
             missing_versions.append(version)
 
         # else, skip
         else:
-            print("Version {} found.".format(version_number))
+            if not args.check:
+                print("Version {} found.".format(version_number))
 
     # if there are missing versions, process them
-    if missing_versions and not args.dry:
+    if missing_versions and not args.dry and not args.check:
         if ACTION:
             # get environment variable for token
             TOKEN = os.environ["GITHUB_TOKEN"]
@@ -226,11 +230,8 @@ def main():
             print("Creating release")
             create_release(repo, version_number, version_prerelease, version_url)
 
-    elif missing_versions and args.dry:
-        print('true')
-
-    else:
-        print('false')
+    if args.check:
+        print(str(bool(missing_versions)).lower())
 
 
 if __name__ == "__main__":

@@ -32,7 +32,7 @@ jobs:
       run: pip3 install -r requirements.txt
 
     - name: Check For Updates
-      run: echo "::set-env name=WT_UPDATE::$(python3 updater.py --dry)"
+      run: echo "::set-env name=WT_UPDATE::$(python3 updater.py --check)"
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
