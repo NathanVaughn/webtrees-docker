@@ -1,6 +1,6 @@
 # Docker Image for [webtrees](https://webtrees.net/)
 
-[![](https://img.shields.io/docker/cloud/build/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
+[![](https://github.com/NathanVaughn/webtrees-docker/workflows/Check%20and%20Push%20Updates/badge.svg)](https://github.com/NathanVaughn/webtrees-docker)
 [![](https://img.shields.io/docker/v/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
 [![](https://img.shields.io/docker/image-size/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
 [![](https://img.shields.io/docker/pulls/nathanvaughn/webtrees)](https://hub.docker.com/r/nathanvaughn/webtrees)
