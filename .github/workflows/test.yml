@@ -37,7 +37,7 @@ jobs:
 
     - name: Setup NPM
       if: github.repository != 'nathanvaughn/webtrees-docker'
-      uses: actions/setup-node@v1
+      uses: actions/setup-node@v2.1.1
 
     - name: Lint 3rd Party
       if: github.repository != 'nathanvaughn/webtrees-docker'
