@@ -18,7 +18,7 @@ CONTAINER = "nathanvaughn/webtrees"
 PLATFORMS = os.getenv("BUILDX_PLATFORMS", "linux/amd64,linux/arm/v7,linux/arm64")
 
 
-def get_latest_versions(repo, number=5):
+def get_latest_versions(repo, number=5, check_assets=False):
     """Get latest versions from a repository releases"""
     # build url
     url = "https://api.github.com/repos/{}/releases".format(repo)
@@ -28,6 +28,13 @@ def get_latest_versions(repo, number=5):
     json_data = json.loads(data.read().decode())
     # only get the latest items
     latest_releases = json_data[0:number]
+
+    # skip releases with no assets
+    if check_assets:
+        for release in latest_releases:
+            if not release["assets"]:
+                latest_releases.remove(release)
+
     return latest_releases
 
 
@@ -151,14 +158,14 @@ def build_image(tags, basic=False):
 def main():
     # allow user to pass list of versions to force re-push
     parser = argparse.ArgumentParser()
-    parser.add_argument("--forced", type=str, nargs="*") # forecfully add specific versions
+    parser.add_argument("--forced", type=str, nargs="*") # forcefully add specific versions
     parser.add_argument("--dry", action="store_true") # only perform a dry run
     parser.add_argument("--check", action="store_true") # only check for updates and output true/false
     parser.add_argument("--basic", action="store_true") # only x86 builds
     args = parser.parse_args()
 
     # get the latest versions of each repo
-    webtrees_versions = get_latest_versions(WEBTREES_REPO)
+    webtrees_versions = get_latest_versions(WEBTREES_REPO, check_assets=True)
     my_versions = get_latest_versions(MY_REPO, 20)
 
     missing_versions = []
@@ -169,7 +176,7 @@ def main():
 
         # check if version is a forced one
         if args.forced and any(v == version_number for v in args.forced):
-            # if not, add to list of missing versions
+            # if so, add to list of missing versions
             if not args.check:
                 print("Version {} forcefully added.".format(version_number))
             missing_versions.append(version)
