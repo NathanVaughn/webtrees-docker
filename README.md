@@ -8,7 +8,7 @@
 
 This is a basic, multi-architecture, up-to-date, Docker image for
 [webtrees](https://github.com/fisharebest/webtrees) served over HTTP,
-designed to be put behind a reverse proxy such as CloudFlare.
+designed to be put behind a reverse proxy such as CloudFlare or Traefik.
 
 ## Usage
 
