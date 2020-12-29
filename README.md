@@ -39,8 +39,8 @@ The image mounts:
 - `/var/www/webtrees/data/`
 - `/var/www/webtrees/media/`
 
-If you want to add custom themes, you can also mount the
-`/var/www/webtrees/themes/` directory.
+If you want to add custom [themes or modules](https://webtrees.net/download/modules),
+you can also mount the `/var/www/webtrees/modules_v4/` directory.
 
 Example `docker-compose`:
 
@@ -48,7 +48,7 @@ Example `docker-compose`:
   volumes:
     - app_data:/var/www/webtrees/data/
     - app_media:/var/www/webtrees/media/
-    - app_themes:/var/www/webtrees/themes/
+    - app_themes:/var/www/webtrees/modules_v4/
 
 ...
 
@@ -59,6 +59,25 @@ volumes:
     driver: local
   app_themes:
     driver: local
+```
+
+See the link above for information about v1.7 webtrees.
+
+The general process to install a theme or module is as follows:
+
+```bash
+docker exec -it webtrees_app_1 bash
+cd /var/www/webtrees/modules_v4/
+wget <download url>
+# if module is a .tar.gz file
+tar -xf <filename.tar.gz>
+rm <filename.tar.gz>
+# if module is a .zip file
+apt update && apt install unzip
+unzip <filename.zip>
+rm <filename.zip>
+
+exit
 ```
 
 ### Database
