@@ -11,6 +11,7 @@ then
     # remove exisitng line from file
     sed -i '/^rewrite_urls/d' "$CONFIG_FILE"
 
+    # test for zero length
     if [[ -z "${PRETTY_URLS}" ]]
     then
         echo "Removing pretty URLs"
@@ -21,6 +22,29 @@ then
     fi
 else
     echo "Config file not found, please setup webtrees."
+fi
+
+# test both for zero length
+if [[ -z "${HTTPS}" && -z "${SSL}" ]]
+then
+    echo "Removing HTTPS support"
+    a2dissite webtrees-ssl
+    a2dissite webtrees-redir
+    a2ensite  webtrees
+else
+    # test both for zero length
+    if [[ -z "${HTTPS_REDIRECT}" && -z "${SSL_REDIRECT}" ]]
+    then
+        echo "Adding HTTPS, removing HTTPS redirect"
+        a2dissite webtrees-redir
+        a2ensite  webtrees
+        a2ensite  webtrees-ssl
+    else
+        echo "Adding HTTPS, adding HTTPS redirect"
+        a2dissite webtrees
+        a2ensite  webtrees-redir
+        a2ensite  webtrees-ssl
+    fi
 fi
 
 exec apache2-foreground

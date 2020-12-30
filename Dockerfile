@@ -17,9 +17,12 @@ RUN apt-get purge g++ make zip unzip -y \
  && rm -rf /var/lib/apt/lists/* /var/tmp/* /etc/apache2/sites-enabled/000-*.conf
 
 COPY php.ini /usr/local/etc/php/php.ini
-COPY webtrees.conf /etc/apache2/sites-enabled/webtrees.conf
+COPY webtrees.conf /etc/apache2/sites-available/webtrees.conf
+COPY webtrees-redir.conf /etc/apache2/sites-available/webtrees-redir.conf
+COPY webtrees-ssl.conf /etc/apache2/sites-available/webtrees-ssl.conf
+
 COPY .htaccess $WEBTREES_HOME
-RUN a2enmod rewrite
+RUN a2enmod rewrite && a2enmod ssl
 
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
@@ -27,6 +30,7 @@ RUN chmod +x /docker-entrypoint.sh
 WORKDIR $WEBTREES_HOME
 
 EXPOSE 80
+EXPOSE 443
 
 VOLUME ["$WEBTREES_HOME/data", "$WEBTREES_HOME/media"]
 

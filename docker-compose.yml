@@ -6,11 +6,14 @@ services:
       - db
     environment:
       PRETTY_URLS: "1"
+      HTTPS: "1"
+      HTTPS_REDIRECT: "1"
     image: nathanvaughn/webtrees:latest
     ports:
       - 1000:80
     restart: unless-stopped
     volumes:
+      - ~/certs:/certs/
       - app_data:/var/www/webtrees/data/
       - app_media:/var/www/webtrees/media/
 
