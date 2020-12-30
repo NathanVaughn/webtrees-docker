@@ -48,7 +48,7 @@ the default value will be used.
 If you don't want the container to be configured automatically
 (if you're migrating from an existing webtrees installation for example), simply leave
 the database (`DB_`) and webtrees (`WT_`) variables blank, and you can complete the
-[setup wizard](https://i.imgur.com/rw70cgW.jpg) like normal.
+[setup wizard](https://i.imgur.com/rw70cgW.png) like normal.
 
 ### Database
 
