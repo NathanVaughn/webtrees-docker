@@ -12,7 +12,7 @@ services:
       DB_HOST: "db"
       DB_PORT: "3306"
       DB_USER: "webtrees"
-      DB_PASS: "badpassword2"
+      DB_PASS: "badpassword"
       DB_NAME: "webtrees"
       DB_PREFIX: "wt_"
       WT_USER: "test"
