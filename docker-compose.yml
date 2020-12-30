@@ -8,6 +8,19 @@ services:
       PRETTY_URLS: "1"
       HTTPS: "1"
       HTTPS_REDIRECT: "1"
+      LANG: "en-US"
+      BASE_URL: "http://localhost:1000"
+      DB_TYPE: "mysql"
+      DB_HOST: "db"
+      DB_PORT: "3306"
+      DB_USER: "webtrees"
+      DB_PASS: "badpassword"
+      DB_NAME: "webtrees"
+      DB_PREFIX: "wt_"
+      WT_USER: "test"
+      WT_NAME: "test"
+      WT_PASS: "123456"
+      WT_EMAIL: "test@test.com"
     image: nathanvaughn/webtrees:latest
     ports:
       - 1000:80
