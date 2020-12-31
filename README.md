@@ -25,10 +25,10 @@ the container. For any environment variable you do not define,
 the default value will be used.
 
 | Environment Variable               | Required | Default    | Notes                                                                                                                                                                                                           |
-|------------------------------------|----------|------------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| ---------------------------------- | -------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `PRETTY_URLS`                      | No       | None       | Setting this to any value will enable [pretty URLs](https://webtrees.net/faq/urls/). This can be toggled at any time.                                                                                           |
-| `HTTPS` or `SSL`                   | No       | None       | Setting this to any value will enable HTTPS. In this case, you *must* mount a directory containing `webtrees.crt` and `webtrees.key` certificates to the directory `/certs/`. For example: `-v ~/certs:/certs/` |
-| `HTTPS_REDIRECT` or `SSL_REDIRECT` | No       | None       | Setting this to any value will enable a *permanent* 301 redirect to HTTPS . Leaving this off will allow webtrees to be accessed over HTTP, but not automatically redirected to HTTPS.                           |
+| `HTTPS` or `SSL`                   | No       | None       | Setting this to any value will enable HTTPS. In this case, you _must_ mount a directory containing `webtrees.crt` and `webtrees.key` certificates to the directory `/certs/`. For example: `-v ~/certs:/certs/` |
+| `HTTPS_REDIRECT` or `SSL_REDIRECT` | No       | None       | Setting this to any value will enable a _permanent_ 301 redirect to HTTPS . Leaving this off will allow webtrees to be accessed over HTTP, but not automatically redirected to HTTPS.                           |
 | `LANG`                             | No       | `en-us`    | webtrees localization setting. This takes a locale code. Examples: [https://wpastra.com/docs/complete-list-wordpress-locale-codes/](https://wpastra.com/docs/complete-list-wordpress-locale-codes/)             |
 | `BASE_URL`                         | Yes      | None       | Base URL of the installation, with protocol. This needs to be in the form of `http://webtrees.example.com`                                                                                                      |
 | `DB_TYPE`                          | No       | `mysql`    | Database server type. See [below](#database) for valid values.                                                                                                                                                  |
@@ -42,8 +42,6 @@ the default value will be used.
 | `WT_NAME`                          | Yes      | None       | First admin account full name. Note, this is only used the first time the container is run, and the database is initialized.                                                                                    |
 | `WT_PASS`                          | Yes      | None       | First admin account password. Note, this is only used the first time the container is run, and the database is initialized.                                                                                     |
 | `WT_EMAIL`                         | Yes      | None       | First admin account email. Note, this is only used the first time the container is run, and the database is initialized.                                                                                        |
-
-
 
 If you don't want the container to be configured automatically
 (if you're migrating from an existing webtrees installation for example), simply leave
@@ -64,26 +62,26 @@ are not recommended. This image does not support Microsoft SQL Server, in order
 to support multiple architectures. See issue:
 [microsoft/msphpsql#441](https://github.com/microsoft/msphpsql/issues/441#issuecomment-310237200)
 
-
 #### SQLite Values
 
 If you want to use a SQLite database, set the following values:
 
- - `DB_TYPE` to `sqlite`
- - `DB_NAME` to `desiredfilename`. Do not include any extension.
+- `DB_TYPE` to `sqlite`
+- `DB_NAME` to `desiredfilename`. Do not include any extension.
 
 #### PostgreSQL Values
 
 If you want to use a PostreSQL database, set the following values:
 
- - `DB_TYPE` to `pgsql`
- - `DB_PORT` to `5432`
+- `DB_TYPE` to `pgsql`
+- `DB_PORT` to `5432`
 
 All other values are just like a MySQL database.
 
 ### Volumes
 
 The image mounts:
+
 - `/var/www/webtrees/data/`
 - `/var/www/webtrees/media/`
 
@@ -93,13 +91,11 @@ you can also mount the `/var/www/webtrees/modules_v4/` directory.
 Example `docker-compose`:
 
 ```yml
-  volumes:
-    - app_data:/var/www/webtrees/data/
-    - app_media:/var/www/webtrees/media/
-    - app_themes:/var/www/webtrees/modules_v4/
-
-...
-
+volumes:
+  - app_data:/var/www/webtrees/data/
+  - app_media:/var/www/webtrees/media/
+  - app_themes:/var/www/webtrees/modules_v4/
+---
 volumes:
   app_data:
     driver: local
@@ -135,9 +131,9 @@ The image exposes port 80 and 443.
 Example `docker-compose`:
 
 ```yml
-  ports:
-    - 80:80
-    - 443:443
+ports:
+  - 80:80
+  - 443:443
 ```
 
 If you have the HTTPS redirect enabled, you still need to expose port 80.
@@ -152,12 +148,13 @@ webtrees will automatically prefer it over `gd` with no configuration.
 ## Tags
 
 > **🚨⚠ WARNING ⚠🚨**
-If you use the 2.X.X or **beta** versions of webtrees,
-you will ***NOT*** be able to use the
-1.X.X version again. The database schema between these versions are
-very different, and this is a one-way operation.
+> If you use the 2.X.X or **beta** versions of webtrees,
+> you will **_NOT_** be able to use the
+> 1.X.X version again. The database schema between these versions are
+> very different, and this is a one-way operation.
 
 ### Specific Versions
+
 Each stable, legacy, beta, and alpha release version of webtrees
 produces a version-tagged build of the Docker container.
 
@@ -168,6 +165,7 @@ image: nathanvaughn/webtrees:1.7.15
 ```
 
 ### Latest
+
 Currently, the tags `latest` and `latest-beta` are available for the latest
 stable and beta versions of webtrees, respectively.
 
@@ -191,7 +189,7 @@ webtrees does not like running behind a reverse proxy, and depending on your set
 you may need to adjust some database values manually.
 
 For example, if you are accessing webtrees via a reverse proxy serving content
-over HTTPS, but using this container with HTTP, you *might* need to make the following
+over HTTPS, but using this container with HTTP, you _might_ need to make the following
 changes in your database:
 
 ```sql
@@ -206,5 +204,6 @@ quit;
 For more info, see [this](https://webtrees.net/admin/proxy/).
 
 ## Inspiration
+
 The Dockerfile is heavily based off
 [solidnerd/docker-bookstack](https://github.com/solidnerd/docker-bookstack).
