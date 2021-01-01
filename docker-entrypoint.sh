@@ -141,7 +141,7 @@ https () {
     else
         if [[ -z "${HTTPS_REDIRECT}" && -z "${SSL_REDIRECT}" ]]
         then
-            echo "$PREFIXAdding HTTPS, removing HTTPS redirect"
+            echo "$PREFIX Adding HTTPS, removing HTTPS redirect"
             a2dissite webtrees-redir
             a2ensite  webtrees
             a2ensite  webtrees-ssl
