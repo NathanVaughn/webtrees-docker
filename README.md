@@ -18,7 +18,7 @@ run standalone.
 If you want to jump right in, take a look at the provided
 [docker-compose.yml](https://github.com/NathanVaughn/webtrees-docker/blob/dev/docker-compose.yml).
 
-### Environment Variables
+### Environment Variables - NEW!
 
 There are many environment variables available to help automatically configure
 the container. For any environment variable you do not define,
@@ -29,7 +29,7 @@ the default value will be used.
 | `PRETTY_URLS`                      | No       | None       | Setting this to any value will enable [pretty URLs](https://webtrees.net/faq/urls/). This can be toggled at any time.                                                                                           |
 | `HTTPS` or `SSL`                   | No       | None       | Setting this to any value will enable HTTPS. In this case, you _must_ mount a directory containing `webtrees.crt` and `webtrees.key` certificates to the directory `/certs/`. For example: `-v ~/certs:/certs/` |
 | `HTTPS_REDIRECT` or `SSL_REDIRECT` | No       | None       | Setting this to any value will enable a _permanent_ 301 redirect to HTTPS . Leaving this off will allow webtrees to be accessed over HTTP, but not automatically redirected to HTTPS.                           |
-| `LANG`                             | No       | `en-us`    | webtrees localization setting. This takes a locale code. Examples: [https://wpastra.com/docs/complete-list-wordpress-locale-codes/](https://wpastra.com/docs/complete-list-wordpress-locale-codes/)             |
+| `LANG`                             | No       | `en-us`    | webtrees localization setting. This takes a locale code. Examples: <https://wpastra.com/docs/complete-list-wordpress-locale-codes/>                                                                             |
 | `BASE_URL`                         | Yes      | None       | Base URL of the installation, with protocol. This needs to be in the form of `http://webtrees.example.com`                                                                                                      |
 | `DB_TYPE`                          | No       | `mysql`    | Database server type. See [below](#database) for valid values.                                                                                                                                                  |
 | `DB_HOST`                          | Yes      | None       | Database server host.                                                                                                                                                                                           |
@@ -54,8 +54,8 @@ webtrees [recommends](https://webtrees.net/install/requirements/)
 a MySQL (or compatible equivalent) database.
 You will need a separate container for this.
 
-- [MariaDB](https://hub.docker.com/_/mariadb)
-- [MySQL](https://hub.docker.com/_/mysql)
+-   [MariaDB](https://hub.docker.com/_/mariadb)
+-   [MySQL](https://hub.docker.com/_/mysql)
 
 PostgreSQL and SQLite are additionally both supported by webtrees and this image, but
 are not recommended. This image does not support Microsoft SQL Server, in order
@@ -66,15 +66,15 @@ to support multiple architectures. See issue:
 
 If you want to use a SQLite database, set the following values:
 
-- `DB_TYPE` to `sqlite`
-- `DB_NAME` to `desiredfilename`. Do not include any extension.
+-   `DB_TYPE` to `sqlite`
+-   `DB_NAME` to `desiredfilename`. Do not include any extension.
 
 #### PostgreSQL Values
 
 If you want to use a PostreSQL database, set the following values:
 
-- `DB_TYPE` to `pgsql`
-- `DB_PORT` to `5432`
+-   `DB_TYPE` to `pgsql`
+-   `DB_PORT` to `5432`
 
 All other values are just like a MySQL database.
 
@@ -82,8 +82,8 @@ All other values are just like a MySQL database.
 
 The image mounts:
 
-- `/var/www/webtrees/data/`
-- `/var/www/webtrees/media/`
+-   `/var/www/webtrees/data/`
+-   `/var/www/webtrees/media/`
 
 If you want to add custom [themes or modules](https://webtrees.net/download/modules),
 you can also mount the `/var/www/webtrees/modules_v4/` directory.
