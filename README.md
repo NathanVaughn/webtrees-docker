@@ -16,7 +16,7 @@ run standalone.
 ### Quickstart
 
 If you want to jump right in, take a look at the provided
-[docker-compose.yml](https://github.com/NathanVaughn/webtrees-docker/blob/dev/docker-compose.yml).
+[docker-compose.yml](https://github.com/NathanVaughn/webtrees-docker/blob/master/docker-compose.yml).
 
 ### Environment Variables - NEW!
 

@@ -9,7 +9,7 @@ services:
       HTTPS: "1"
       HTTPS_REDIRECT: "1"
       LANG: "en-US"
-      BASE_URL: "https://localhost"
+      BASE_URL: "https://webtrees.example.com"
       DB_TYPE: "mysql"
       DB_HOST: "db"
       DB_PORT: "3306"
