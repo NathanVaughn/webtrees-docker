@@ -3,7 +3,7 @@ name: Check and Push Updates
 on:
   schedule:
     - cron:  '0 12 * * *'
-  repository_dispatch:
+  workflow_dispatch:
 
 jobs:
   main:
