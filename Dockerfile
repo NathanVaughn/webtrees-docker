@@ -60,4 +60,5 @@ LABEL org.label-schema.schema-version="1.0" \
       org.label-schema.version=$WEBTREES_VERSION \
       org.label-schema.vcs-ref=$VCS_REF \
       org.label-schema.vcs-url="https://github.com/nathanvaughn/webtrees-docker.git" \
-      org.label-schema.vcs-type="Git"
+      org.label-schema.vcs-type="Git" \
+      org.opencontainers.image.source=https://github.com/nathanvaughn/webtrees-docker

@@ -14,7 +14,7 @@ ACTION = json.loads(os.getenv("GITHUB_ACTIONS", default="false").lower())
 WEBTREES_REPO = "fisharebest/webtrees"
 MY_REPO = os.getenv("GITHUB_REPOSITORY", default="nathanvaughn/webtrees-docker")
 
-CONTAINER = "nathanvaughn/webtrees"
+CONTAINERS = ["docker.io/nathanvaughn/webtrees", "ghcr.io/nathanvaughn/webtrees"]
 PLATFORMS = os.getenv("BUILDX_PLATFORMS", "linux/amd64,linux/arm/v7,linux/arm64")
 
 
@@ -136,32 +136,51 @@ def get_tags(version_number):
 
 def build_image(tags, basic=False):
     """Build the Docker image"""
-    tagging = " ".join("--tag {}:{}".format(CONTAINER, tag) for tag in tags)
 
+    # build the list of tags
+    # ex:
+    # - docker.io/nathanvaughn/webtrees:latest
+    # - docker.io/nathanvaughn/webtrees:2.0.0
+    # - ghcr.io/nathanvaughn/webtrees:latest
+    # - ghcr.io/nathanvaughn/webtrees:2.0.0
+    tagging_list = []
+    for container in CONTAINERS:
+        for tag in tags:
+            tagging_list.append("{}:{}".format(container, tag))
+
+    # join everything together into a big command with a --tag for each tag
+    tagging_cmd = " ".join("--tag {}".format(tagging) for tagging in tagging_list)
+
+    # prepare the building command
     if not basic:
-        build_command = 'docker buildx build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --push --platform {} {}'.format(
-            PLATFORMS, tagging
+        build_command = 'docker buildx build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --platform {} {}'.format(
+            PLATFORMS, tagging_cmd
         )
     else:
         build_command = 'docker build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` {}'.format(
-            tagging
+            tagging_cmd
         )
 
+    # build the image
     print(build_command)
     subprocess.run(build_command, shell=True, check=True)
 
-    if basic:
-        for tag in tags:
-            subprocess.run("docker push {}:{}".format(CONTAINER, tag), shell=True)
+    # push all the tags
+    for tagging in tagging_list:
+        subprocess.run("docker push {}".format(tagging), shell=True)
 
 
 def main():
     # allow user to pass list of versions to force re-push
     parser = argparse.ArgumentParser()
-    parser.add_argument("--forced", type=str, nargs="*") # forcefully add specific versions
-    parser.add_argument("--dry", action="store_true") # only perform a dry run
-    parser.add_argument("--check", action="store_true") # only check for updates and output true/false
-    parser.add_argument("--basic", action="store_true") # only x86 builds
+    parser.add_argument(
+        "--forced", type=str, nargs="*"
+    )  # forcefully add specific versions
+    parser.add_argument("--dry", action="store_true")  # only perform a dry run
+    parser.add_argument(
+        "--check", action="store_true"
+    )  # only check for updates and output true/false
+    parser.add_argument("--basic", action="store_true")  # only x86 builds
     args = parser.parse_args()
 
     # get the latest versions of each repo
