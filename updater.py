@@ -136,7 +136,7 @@ def get_tags(version_number):
 
 def build_image(tags, basic=False):
     """Build the Docker image"""
-    tagging = " ".join(["--tag {}:{}".format(CONTAINER, tag) for tag in tags])
+    tagging = " ".join("--tag {}:{}".format(CONTAINER, tag) for tag in tags)
 
     if not basic:
         build_command = 'docker buildx build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --push --platform {} {}'.format(
