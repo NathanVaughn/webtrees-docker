@@ -7,9 +7,33 @@ echo "$PREFIX Setting folder permissions for uploads"
 chown -R www-data:www-data data && chmod -R 775 data
 chown -R www-data:www-data media && chmod -R 775 media
 
+# Pull environment variables from files
+
+PRETTY_URLS=$(cat "$PRETTY_URLS_FILE" 2> /dev/null || echo $PRETTY_URLS)
+HTTPS=$(cat "$HTTPS_FILE" 2> /dev/null || echo $HTTPS)
+SSL=$(cat "$SSL_FILE" 2> /dev/null || echo $SSL)
+HTTPS_REDIRECT=$(cat "$HTTPS_REDIRECT_FILE" 2> /dev/null || echo $HTTPS_REDIRECT)
+SSL_REDIRECT=$(cat "$SSL_REDIRECT_FILE" 2> /dev/null || echo $SSL_REDIRECT)
+LANG=$(cat "$LANG_FILE" 2> /dev/null || echo $LANG)
+BASE_URL=$(cat "$BASE_URL_FILE" 2> /dev/null || echo $BASE_URL)
+DB_TYPE=$(cat "$DB_TYPE_FILE" 2> /dev/null || echo $DB_TYPE)
+DB_HOST=$(cat "$DB_HOST_FILE" 2> /dev/null || echo $DB_HOST)
+DB_PORT=$(cat "$DB_PORT_FILE" 2> /dev/null || echo $DB_PORT)
+DB_USER=$(cat "$DB_USER_FILE" 2> /dev/null || echo $DB_USER)
+MYSQL_USER=$(cat "$MYSQL_USER_FILE" 2> /dev/null || echo $MYSQL_USER)
+DB_PASS=$(cat "$DB_PASS_FILE" 2> /dev/null || echo $DB_PASS)
+MYSQL_PASSWORD=$(cat "$MYSQL_PASSWORD_FILE" 2> /dev/null || echo $MYSQL_PASSWORD)
+DB_NAME=$(cat "$DB_NAME_FILE" 2> /dev/null || echo $DB_NAME)
+MYSQL_DATABASE=$(cat "$MYSQL_DATABASE_FILE" 2> /dev/null || echo $MYSQL_DATABASE)
+DB_PREFIX=$(cat "$DB_PREFIX_FILE" 2> /dev/null || echo $DB_PREFIX)
+WT_USER=$(cat "$WT_USER_FILE" 2> /dev/null || echo $WT_USER)
+WT_NAME=$(cat "$WT_NAME_FILE" 2> /dev/null || echo $WT_NAME)
+WT_PASS=$(cat "$WT_PASS_FILE" 2> /dev/null || echo $WT_PASS)
+WT_EMAIL=$(cat "$WT_EMAIL_FILE" 2> /dev/null || echo $WT_EMAIL)
+
 auto_wizard () {
     # automatically try to complete the setup wizard
-    echo "$PREFIX Attempting to automate setup wizard."
+    echo "$PREFIX Attempting to automate setup wizard"
 
     # defaults
     lang="${LANG:-en-US}"
@@ -31,16 +55,16 @@ auto_wizard () {
     # test if config file exists
     if [ -f "$CONFIG_FILE" ]
     then
-        echo "$PREFIX Config file found."
+        echo "$PREFIX Config file found"
 
         # make sure all of the variables for the config file are present
         if [[ -z "$dbhost" || -z "$dbport" || -z "$dbuser" || -z "$dbpass" || -z "$dbname" || -z "$baseurl" ]]
         then
-            echo "$PREFIX Not all variables required for config file update."
+            echo "$PREFIX Not all variables required for config file update"
             return 0
         fi
 
-        echo "$PREFIX Updating config file."
+        echo "$PREFIX Updating config file"
 
         # remove the line with sed, then write new content
         sed -i '/^dbhost/d' "$CONFIG_FILE" && echo "dbhost=\"$dbhost\"" >> $CONFIG_FILE
@@ -52,16 +76,16 @@ auto_wizard () {
         sed -i '/^base_url/d' "$CONFIG_FILE" && echo "base_url=\"$baseurl\"" >> $CONFIG_FILE
 
     else
-        echo "$PREFIX Config file NOT found."
+        echo "$PREFIX Config file NOT found"
 
         # make sure all of the variables needed for the setup wizard are present
         if [[ -z "$lang" || -z "$dbtype" || -z "$dbhost" || -z "$dbport" || -z "$dbuser" || -z "$dbpass" || -z "$dbname" || -z "$baseurl" || -z "$wtname" || -z "$wtuser" || -z "$wtpass" || -z "$wtemail" ]]
         then
-            echo "$PREFIX Not all variables required for setup wizard present."
+            echo "$PREFIX Not all variables required for setup wizard present"
             return 0
         fi
 
-        echo "$PREFIX Automating setup wizard."
+        echo "$PREFIX Automating setup wizard"
 
         # start apache in the background quickly to send the request
         service apache2 start
@@ -79,7 +103,7 @@ auto_wizard () {
                 sleep 1
             done
         else
-            echo "$PREFIX Waiting 10 seconds arbitrarily for database server to be ready."
+            echo "$PREFIX Waiting 10 seconds arbitrarily for database server to be ready"
             sleep 10
         fi
 
@@ -107,30 +131,30 @@ auto_wizard () {
 }
 
 pretty_urls () {
-    echo "$PREFIX Attempting to set pretty URLs status."
+    echo "$PREFIX Attempting to set pretty URLs status"
 
     if [ -f "$CONFIG_FILE" ]
     then
-        echo "$PREFIX Config file found."
+        echo "$PREFIX Config file found"
 
         # remove exisiting line from file
         sed -i '/^rewrite_urls/d' "$CONFIG_FILE"
 
         if [[ -z "${PRETTY_URLS}" ]]
         then
-            echo "$PREFIX Removing pretty URLs."
+            echo "$PREFIX Removing pretty URLs"
             echo 'rewrite_urls="0"' >> $CONFIG_FILE
         else
-            echo "$PREFIX Adding pretty URLs."
+            echo "$PREFIX Adding pretty URLs"
             echo 'rewrite_urls="1"' >> $CONFIG_FILE
         fi
     else
-        echo "$PREFIX Config file NOT found, please setup webtrees."
+        echo "$PREFIX Config file NOT found, please setup webtrees"
     fi
 }
 
 https () {
-    echo "$PREFIX Attempting to set HTTPS status."
+    echo "$PREFIX Attempting to set HTTPS status"
 
     if [[ -z "${HTTPS}" && -z "${SSL}" ]]
     then
@@ -158,6 +182,6 @@ auto_wizard
 pretty_urls
 https
 
-echo "$PREFIX Starting Apache."
+echo "$PREFIX Starting Apache"
 
 exec apache2-foreground

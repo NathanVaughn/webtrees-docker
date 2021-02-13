@@ -43,6 +43,11 @@ the default value will be used.
 | `WT_PASS`                          | Yes      | None       | First admin account password. Note, this is only used the first time the container is run, and the database is initialized.                                                                                     |
 | `WT_EMAIL`                         | Yes      | None       | First admin account email. Note, this is only used the first time the container is run, and the database is initialized.                                                                                        |
 
+Additionally, you can add `_FILE` to the end of any environment variable name,
+and instead that will read the value in from the given filename.
+For example, setting `DB_PASS_FILE=/run/secrets/my_db_secret` will read the contents
+of that file into `DB_PASS`.
+
 If you don't want the container to be configured automatically
 (if you're migrating from an existing webtrees installation for example), simply leave
 the database (`DB_`) and webtrees (`WT_`) variables blank, and you can complete the
