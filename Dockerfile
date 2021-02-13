@@ -30,8 +30,13 @@ COPY webtrees-ssl.conf /etc/apache2/sites-available/webtrees-ssl.conf
 
 RUN a2enmod rewrite && a2enmod ssl
 
+# entrypoint
 COPY docker-entrypoint.sh /
 RUN chmod +x /docker-entrypoint.sh
+
+# healthcheck
+COPY docker-healthcheck.sh /
+RUN chmod +x /docker-healthcheck.sh
 
 WORKDIR $WEBTREES_HOME
 
@@ -40,6 +45,7 @@ EXPOSE 443
 
 VOLUME ["$WEBTREES_HOME/data", "$WEBTREES_HOME/media"]
 
+HEALTHCHECK CMD /docker-healthcheck.sh
 ENTRYPOINT ["/docker-entrypoint.sh"]
 
 ARG BUILD_DATE

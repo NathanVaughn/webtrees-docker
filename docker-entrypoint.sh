@@ -1,11 +1,11 @@
 #!/bin/bash
 
-echo "Setting folder permissions for uploads"
-chown -R www-data:www-data data && chmod -R 775 data
-chown -R www-data:www-data media && chmod -R 775 media
-
 CONFIG_FILE="data/config.ini.php"
 PREFIX="[NV_INIT]"
+
+echo "$PREFIX Setting folder permissions for uploads"
+chown -R www-data:www-data data && chmod -R 775 data
+chown -R www-data:www-data media && chmod -R 775 media
 
 auto_wizard () {
     # automatically try to complete the setup wizard
