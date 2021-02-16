@@ -3,18 +3,36 @@ FROM php:7.4-apache
 ENV WEBTREES_VERSION=2.0.11
 ENV WEBTREES_HOME="/var/www/webtrees"
 
-RUN apt-get update && apt-get install -y git curl locales locales-all mariadb-client g++ unzip zlib1g-dev libfreetype6-dev libjpeg62-turbo-dev libpng-dev libmcrypt-dev libzip-dev libicu-dev libpq-dev libmagickwand-dev --no-install-recommends && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y \
+      curl \
+      g++ \
+      git \
+      libfreetype6-dev \
+      libicu-dev \
+      libjpeg62-turbo-dev \
+      libmagickwand-dev \
+      libmcrypt-dev \
+      libpng-dev \
+      libpq-dev \
+      libzip-dev \
+      locales \
+      locales-all \
+      mariadb-client \
+      unzip \
+      zlib1g-dev \
+      --no-install-recommends \
+      && rm -rf /var/lib/apt/lists/*
 RUN pecl install imagick \
- && docker-php-ext-enable imagick \
- && docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql zip intl gd exif
+      && docker-php-ext-enable imagick \
+      && docker-php-ext-configure gd --with-freetype --with-jpeg \
+      && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql zip intl gd exif
 RUN curl -s -L https://github.com/fisharebest/webtrees/releases/download/${WEBTREES_VERSION}/webtrees-${WEBTREES_VERSION}.zip -o webtrees.zip \
- && unzip -q webtrees.zip -d /var/www/ && rm webtrees.zip \
- && chown -R www-data:www-data $WEBTREES_HOME
+      && unzip -q webtrees.zip -d /var/www/ && rm webtrees.zip \
+      && chown -R www-data:www-data $WEBTREES_HOME
 RUN apt-get purge g++ make zip unzip -y \
- && apt-get autoremove -y \
- && apt-get clean \
- && rm -rf /var/tmp/* /etc/apache2/sites-enabled/000-*.conf
+      && apt-get autoremove -y \
+      && apt-get clean \
+      && rm -rf /var/tmp/* /etc/apache2/sites-enabled/000-*.conf
 
 # for perl
 ENV LC_ALL en_US.UTF-8
