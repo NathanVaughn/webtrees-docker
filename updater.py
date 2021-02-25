@@ -14,7 +14,11 @@ ACTION = json.loads(os.getenv("GITHUB_ACTIONS", default="false").lower())
 WEBTREES_REPO = "fisharebest/webtrees"
 MY_REPO = os.getenv("GITHUB_REPOSITORY", default="nathanvaughn/webtrees-docker")
 
-CONTAINERS = ["docker.io/nathanvaughn/webtrees", "ghcr.io/nathanvaughn/webtrees"]
+IMAGES = [
+    "docker.io/nathanvaughn/webtrees",
+    "ghcr.io/nathanvaughn/webtrees",
+    "public.ecr.aws/p4g0j6e0/webtrees",
+]
 PLATFORMS = os.getenv("BUILDX_PLATFORMS", "linux/amd64,linux/arm/v7,linux/arm64")
 
 
@@ -144,9 +148,9 @@ def build_image(tags, basic=False):
     # - ghcr.io/nathanvaughn/webtrees:latest
     # - ghcr.io/nathanvaughn/webtrees:2.0.0
     tagging_list = []
-    for container in CONTAINERS:
+    for image in IMAGES:
         for tag in tags:
-            tagging_list.append("{}:{}".format(container, tag))
+            tagging_list.append("{}:{}".format(image, tag))
 
     # join everything together into a big command with a --tag for each tag
     tagging_cmd = " ".join("--tag {}".format(tagging) for tagging in tagging_list)

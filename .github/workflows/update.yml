@@ -83,6 +83,18 @@ jobs:
         username: ${{ secrets.GITHUBCR_USERNAME }}
         password: ${{ secrets.GITHUBCR_PASSWORD }}
 
+    - name: Configure AWS Credentials
+      if: env.WT_UPDATE == 'true'
+      uses: aws-actions/configure-aws-credentials@v1
+      with:
+        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        aws-region: us-east-1
+
+    - name: Amazon ECR Login
+      if: env.WT_UPDATE == 'true'
+      run: aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws
+
     - name: Run Updater Script
       if: env.WT_UPDATE == 'true'
       run: python3 updater.py
@@ -90,6 +102,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         #BUILDX_PLATFORMS: ${{ steps.buildx.outputs.platforms }}
 
-    - name: Clear Dockerhub Credentials
+    - name: Clear Docker Credentials
       if: always()
       run: rm -f ${HOME}/.docker/config.json
