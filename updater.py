@@ -14,11 +14,7 @@ ACTION = json.loads(os.getenv("GITHUB_ACTIONS", default="false").lower())
 WEBTREES_REPO = "fisharebest/webtrees"
 MY_REPO = os.getenv("GITHUB_REPOSITORY", default="nathanvaughn/webtrees-docker")
 
-IMAGES = [
-    "docker.io/nathanvaughn/webtrees",
-    "ghcr.io/nathanvaughn/webtrees",
-    "public.ecr.aws/p4g0j6e0/webtrees",
-]
+IMAGES = ["docker.io/nathanvaughn/webtrees", "ghcr.io/nathanvaughn/webtrees"]
 PLATFORMS = os.getenv("BUILDX_PLATFORMS", "linux/amd64,linux/arm/v7,linux/arm64")
 
 
