@@ -1,6 +1,6 @@
 FROM php:7.4-apache
 
-ENV WEBTREES_VERSION=2.0.11
+ENV WEBTREES_VERSION=1.7.18
 ENV WEBTREES_HOME="/var/www/webtrees"
 
 RUN apt-get update && apt-get install -y \
