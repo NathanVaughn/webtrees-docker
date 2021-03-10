@@ -89,7 +89,3 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         #BUILDX_PLATFORMS: ${{ steps.buildx.outputs.platforms }}
-
-    - name: Clear Docker Credentials
-      if: always()
-      run: rm -f ${HOME}/.docker/config.json

@@ -111,13 +111,16 @@ def commit_changes(repo, version):
 
 def create_release(repo, version, prerelease, url):
     """Create a release for a repository"""
-    repo.create_git_release(
-        version,
-        version,
-        "Automated release for webtrees version {}: {}".format(version, url),
-        draft=False,
-        prerelease=prerelease,
-    )
+    try:
+        repo.create_git_release(
+            version,
+            version,
+            "Automated release for webtrees version {}: {}".format(version, url),
+            draft=False,
+            prerelease=prerelease,
+        )
+    except:
+        print("Release could not be created, ignore")
 
 
 def get_tags(version_number):
@@ -167,7 +170,9 @@ def build_image(tags, basic=False):
 
     # push all the tags
     for tagging in tagging_list:
-        subprocess.run("docker push {}".format(tagging), shell=True)
+        push_command = "docker push {}".format(tagging)
+        print(push_command)
+        subprocess.run(push_command, shell=True)
 
 
 def main():
