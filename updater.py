@@ -155,24 +155,25 @@ def build_image(tags, basic=False):
     tagging_cmd = " ".join("--tag {}".format(tagging) for tagging in tagging_list)
 
     # prepare the building command
-    if not basic:
-        build_command = 'docker buildx build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --platform {} {}'.format(
-            PLATFORMS, tagging_cmd
-        )
-    else:
+    if basic:
         build_command = 'docker build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` {}'.format(
             tagging_cmd
+        )
+    else:
+        build_command = 'docker buildx build . --push --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --platform {} {}'.format(
+            PLATFORMS, tagging_cmd
         )
 
     # build the image
     print(build_command)
     subprocess.run(build_command, shell=True, check=True)
 
-    # push all the tags
-    for tagging in tagging_list:
-        push_command = "docker push {}".format(tagging)
-        print(push_command)
-        subprocess.run(push_command, shell=True)
+    if basic:
+        # push all the tags
+        for tagging in tagging_list:
+            push_command = "docker push {}".format(tagging)
+            print(push_command)
+            subprocess.run(push_command, shell=True)
 
 
 def main():
