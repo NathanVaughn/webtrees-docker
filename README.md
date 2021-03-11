@@ -166,7 +166,7 @@ produces a version-tagged build of the Docker container.
 Example:
 
 ```yml
-image: nathanvaughn/webtrees:1.7.15
+image: ghcr.io/nathanvaughn/webtrees:1.7.15
 ```
 
 ### Latest
@@ -177,7 +177,7 @@ stable and beta versions of webtrees, respectively.
 Example:
 
 ```yml
-image: nathanvaughn/webtrees:latest-beta
+image: ghcr.io/nathanvaughn/webtrees:latest-beta
 ```
 
 ## Issues
@@ -207,6 +207,13 @@ quit;
 ```
 
 For more info, see [this](https://webtrees.net/admin/proxy/).
+
+## Registry
+
+This image is available from 3 different registries. Choose whichever you want:
+
+ - [docker.io/nathanvaughn/webtrees](https://hub.docker.com/r/nathanvaughn/webtrees)
+ - [ghcr.io/nathanvaughn/webtrees](https://github.com/users/nathanvaughn/packages/container/package/webtrees)
 
 ## Inspiration
 
