@@ -171,13 +171,13 @@ image: ghcr.io/nathanvaughn/webtrees:1.7.15
 
 ### Latest
 
-Currently, the tags `latest` and `latest-beta` are available for the latest
-stable and beta versions of webtrees, respectively.
+Currently, the tags `latest` and `latest-legacy` are available for the latest
+stable and legacy versions of webtrees, respectively.
 
 Example:
 
 ```yml
-image: ghcr.io/nathanvaughn/webtrees:latest-beta
+image: ghcr.io/nathanvaughn/webtrees:latest-legacy
 ```
 
 ## Issues
