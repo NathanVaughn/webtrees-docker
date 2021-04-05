@@ -18,7 +18,7 @@ run standalone.
 If you want to jump right in, take a look at the provided
 [docker-compose.yml](https://github.com/NathanVaughn/webtrees-docker/blob/master/docker-compose.yml).
 
-### Environment Variables - NEW!
+### Environment Variables
 
 There are many environment variables available to help automatically configure
 the container. For any environment variable you do not define,
