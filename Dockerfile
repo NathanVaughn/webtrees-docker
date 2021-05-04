@@ -28,7 +28,8 @@ RUN pecl install imagick \
       && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql zip intl gd exif
 RUN curl -s -L https://github.com/fisharebest/webtrees/releases/download/${WEBTREES_VERSION}/webtrees-${WEBTREES_VERSION}.zip -o webtrees.zip \
       && unzip -q webtrees.zip -d /var/www/ && rm webtrees.zip \
-      && chown -R www-data:www-data $WEBTREES_HOME
+      && chown -R www-data:www-data $WEBTREES_HOME \
+      && perl -0777 -i -pe 's/public\s+function\s+isUpgradeAvailable[\S\s]+?{[\S\s]+?}/public function isUpgradeAvailable(){ return false; }/' $WEBTREES_HOME/app/Services/UpgradeService.php
 RUN apt-get purge g++ make zip unzip -y \
       && apt-get autoremove -y \
       && apt-get clean \
