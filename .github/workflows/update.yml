@@ -54,7 +54,7 @@ jobs:
 
     - name: Set up QEMU
       if: env.WT_UPDATE == 'true'
-      uses: docker/setup-qemu-action@v1
+      uses: docker/setup-qemu-action@v1.1.0
       with:
         platforms: all
 
