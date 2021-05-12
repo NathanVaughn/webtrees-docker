@@ -87,6 +87,6 @@ LABEL org.label-schema.schema-version="1.0" \
       org.opencontainers.image.url="https://github.com/nathanvaughn/webtrees-docker" \
       org.opencontainers.image.authors="Nathan Vaughn" \
       org.opencontainers.image.vendor="nathanvaughn" \
-      org.opencontainers.image.version=$POWERPANEL_VERSION \
+      org.opencontainers.image.version=$WEBTREES_VERSION \
       org.opencontainers.image.revision=$VCS_REF \
       org.opencontainers.image.source="https://github.com/nathanvaughn/webtrees-docker.git"
