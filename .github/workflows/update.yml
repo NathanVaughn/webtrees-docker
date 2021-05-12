@@ -17,7 +17,7 @@ jobs:
         ref: master
 
     - name: Cache Pip
-      uses: actions/cache@v2
+      uses: actions/cache@v2.1.5
       id: cache-pip
       with:
         path: ~/.cache/pip
@@ -47,7 +47,7 @@ jobs:
 
     - name: Cache Docker Layers
       if: env.WT_UPDATE == 'true'
-      uses: actions/cache@v2
+      uses: actions/cache@v2.1.5
       with:
         path: /tmp/.buildx-cache
         key: buildx-${ WEEK }
