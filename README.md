@@ -118,9 +118,11 @@ To install a custom theme or module, the process is generally as follows:
 docker exec -it webtrees_app_1 bash   # connect to the running container
 cd /var/www/webtrees/modules_v4/      # move into the modules directory
 curl -L <download url> -o <filename>  # download the file
+
 # if module is a .tar.gz file
 tar -xf <filename.tar.gz>             # extract the tar archive https://xkcd.com/1168/
 rm <filename.tar.gz>                  # remove the tar archive
+
 # if module is a .zip file
 apt update && apt install unzip       # install the unzip package
 unzip <filename.zip>                  # extract the zip file
@@ -210,10 +212,11 @@ For more info, see [this](https://webtrees.net/admin/proxy/).
 
 ## Registry
 
-This image is available from 2 different registries. Choose whichever you want:
+This image is available from 3 different registries. Choose whichever you want:
 
  - [docker.io/nathanvaughn/webtrees](https://hub.docker.com/r/nathanvaughn/webtrees)
  - [ghcr.io/nathanvaughn/webtrees](https://github.com/users/nathanvaughn/packages/container/package/webtrees)
+ - cr.nthnv.me/webtrees (experimental)
 
 ## Inspiration
 
