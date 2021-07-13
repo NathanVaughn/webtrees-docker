@@ -26,11 +26,12 @@ jobs:
     # use pre-made action
 
     - name: Lint 1st Party
-      uses: luke142367/Docker-Lint-Action@master
+      uses: luke142367/Docker-Lint-Action@v1.1.1
       if: github.repository == 'nathanvaughn/webtrees-docker'
+      with:
+        target: Dockerfile
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        TARGET: Dockerfile
 
     # pre-made action doesn't work on forks due to Github token limitations
     # so, run the underlying linter without the fancy inline diff annotations
