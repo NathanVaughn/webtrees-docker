@@ -23,23 +23,8 @@ jobs:
     - name: Checkout
       uses: actions/checkout@v2
 
-    # use pre-made action
-
-    - name: Lint 1st Party
-      uses: luke142367/Docker-Lint-Action@v1.1.1
-      if: github.repository == 'nathanvaughn/webtrees-docker'
+    - name: Lint
+      uses: hadolint/hadolint-action@v1.5.0
       with:
-        target: Dockerfile
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    # pre-made action doesn't work on forks due to Github token limitations
-    # so, run the underlying linter without the fancy inline diff annotations
-
-    - name: Setup NPM
-      if: github.repository != 'nathanvaughn/webtrees-docker'
-      uses: actions/setup-node@v2
-
-    - name: Lint 3rd Party
-      if: github.repository != 'nathanvaughn/webtrees-docker'
-      run: npm install dockerfilelint && npx dockerfilelint Dockerfile
+        dockerfile: Dockerfile
+        failure-threshold: error
