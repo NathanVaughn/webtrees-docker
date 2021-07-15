@@ -24,6 +24,11 @@ There are many environment variables available to help automatically configure
 the container. For any environment variable you do not define,
 the default value will be used.
 
+> **🚨 WARNING 🚨**
+> These environment variables will be visible in the webtrees control panel
+> under "Server information". Either lock down the control panel
+> to administrators, or use the webtrees setup wizard.
+
 | Environment Variable               | Required | Default    | Notes                                                                                                                                                                                                           |
 | ---------------------------------- | -------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `PRETTY_URLS`                      | No       | None       | Setting this to any value will enable [pretty URLs](https://webtrees.net/faq/urls/). This can be toggled at any time.                                                                                           |
@@ -154,7 +159,7 @@ webtrees will automatically prefer it over `gd` with no configuration.
 
 ## Tags
 
-> **🚨⚠ WARNING ⚠🚨**
+> **🚨 WARNING 🚨**
 > If you use the 2.X.X or **beta** versions of webtrees,
 > you will **_NOT_** be able to use the
 > 1.X.X version again. The database schema between these versions are
