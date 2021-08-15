@@ -80,8 +80,8 @@ jobs:
       uses: docker/login-action@v1
       with:
         registry: ghcr.io
-        username: ${{ secrets.GITHUBCR_USERNAME }}
-        password: ${{ secrets.GITHUBCR_PASSWORD }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
 
     - name: nthnv.me CR Login
       if: env.WT_UPDATE == 'true'
