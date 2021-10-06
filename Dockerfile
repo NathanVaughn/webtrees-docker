@@ -1,4 +1,4 @@
-FROM php:8.0.10-apache
+FROM php:8.0.11-apache
 
 ENV WEBTREES_VERSION=2.0.16
 ENV WEBTREES_HOME="/var/www/webtrees"
