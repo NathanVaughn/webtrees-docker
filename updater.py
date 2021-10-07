@@ -5,8 +5,10 @@ import os
 import subprocess
 import sys
 import urllib.request
+from typing import List, Tuple
 
 import github
+import github.Repository
 
 # check if we're currently running from a github action
 # if so, this is the string 'true'. Use json.loads() to convert it to a boolean
@@ -14,14 +16,20 @@ ACTION = json.loads(os.getenv("GITHUB_ACTIONS", default="false").lower())
 WEBTREES_REPO = "fisharebest/webtrees"
 MY_REPO = os.getenv("GITHUB_REPOSITORY", default="nathanvaughn/webtrees-docker")
 
-IMAGES = ["docker.io/nathanvaughn/webtrees", "ghcr.io/nathanvaughn/webtrees", "cr.nthnv.me/webtrees"]
+IMAGES = [
+    "docker.io/nathanvaughn/webtrees",
+    "ghcr.io/nathanvaughn/webtrees",
+    "cr.nthnv.me/webtrees",
+]
 PLATFORMS = os.getenv("BUILDX_PLATFORMS", "linux/amd64,linux/arm/v7,linux/arm64")
 
 
-def get_latest_versions(repo, number=5, check_assets=False):
+def get_latest_versions(
+    repo: str, number: int = 5, check_assets: bool = False
+) -> List[dict]:
     """Get latest versions from a repository releases"""
     # build url
-    url = "https://api.github.com/repos/{}/releases".format(repo)
+    url = f"https://api.github.com/repos/{repo}/releases"
     # download data
     data = urllib.request.urlopen(url)
     # parse json
@@ -38,7 +46,7 @@ def get_latest_versions(repo, number=5, check_assets=False):
     return latest_releases
 
 
-def delete_release(repo, name):
+def delete_release(repo: github.Repository.Repository, name: str) -> None:
     """Delete a release from a repository"""
     # get all releses
     releases = repo.get_releases()
@@ -46,23 +54,23 @@ def delete_release(repo, name):
         # fore each release, check name
         if release.tag_name == name:
             release.delete_release()
-            print("Release {} deleted".format(name))
+            print(f"Release {name} deleted")
 
 
-def delete_tag(repo, name):
+def delete_tag(repo: github.Repository.Repository, name: str) -> bool:
     """Delete a tag from a repository"""
-    name = "tags/{}".format(name)
+    name = f"tags/{name}"
 
     try:
         # try to delete the ref for the tag we care about
         ref = repo.get_git_ref(name)
         ref.delete()
-        print("Ref {} deleted".format(name))
+        print(f"Ref {name} deleted")
         return True
 
     except github.UnknownObjectException:
         # 404
-        print("Ref {} not found".format(name))
+        print(f"Ref {name} not found")
 
         print("Refs:")
         for ref in repo.get_git_refs():
@@ -75,7 +83,7 @@ def delete_tag(repo, name):
         return False
 
 
-def update_dockerfile(version):
+def update_dockerfile(version: str) -> None:
     """Update the Dockerfile with a new webtrees version number"""
     # read the data of the file
     with open("Dockerfile", "r") as f:
@@ -93,7 +101,7 @@ def update_dockerfile(version):
                 f.write(line)
 
 
-def commit_changes(repo, version):
+def commit_changes(repo: github.Repository.Repository, version: str) -> None:
     """Commit and push changes to a repository"""
     # get the blob SHA of the file we're updating
     sha = repo.get_contents("Dockerfile").sha
@@ -103,19 +111,21 @@ def commit_changes(repo, version):
     # update
     repo.update_file(
         "Dockerfile",
-        "Automated Dockerfile update for webtrees version {}".format(version),
+        f"Automated Dockerfile update for webtrees version {version}",
         content,
         sha,
     )
 
 
-def create_release(repo, version, prerelease, url):
+def create_release(
+    repo: github.Repository.Repository, version: str, prerelease: bool, url: str
+) -> None:
     """Create a release for a repository"""
     try:
         repo.create_git_release(
             version,
             version,
-            "Automated release for webtrees version {}: {}".format(version, url),
+            f"Automated release for webtrees version {version}: {url}",
             draft=False,
             prerelease=prerelease,
         )
@@ -123,7 +133,7 @@ def create_release(repo, version, prerelease, url):
         print("Release could not be created, ignore")
 
 
-def get_tags(version_number):
+def get_tags(version_number: str) -> List[str]:
     """Get comma separated tags for a version number"""
     if "alpha" in version_number:
         tag = "latest-alpha"
@@ -137,7 +147,7 @@ def get_tags(version_number):
     return [tag, version_number]
 
 
-def build_image(tags, basic=False):
+def build_image(tags: List[str], basic: bool = False) -> None:
     """Build the Docker image"""
 
     # build the list of tags
@@ -149,20 +159,16 @@ def build_image(tags, basic=False):
     tagging_list = []
     for image in IMAGES:
         for tag in tags:
-            tagging_list.append("{}:{}".format(image, tag))
+            tagging_list.append(f"{image}:{tag}")
 
     # join everything together into a big command with a --tag for each tag
-    tagging_cmd = " ".join("--tag {}".format(tagging) for tagging in tagging_list)
+    tagging_cmd = " ".join(f"--tag {tagging}" for tagging in tagging_list)
 
     # prepare the building command
     if basic:
-        build_command = 'docker build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` {}'.format(
-            tagging_cmd
-        )
+        build_command = f'docker build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` {tagging_cmd}'
     else:
-        build_command = 'docker buildx build . --push --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --platform {} {}'.format(
-            PLATFORMS, tagging_cmd
-        )
+        build_command = f'docker buildx build . --push --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --platform {PLATFORMS} {tagging_cmd}'
 
     # build the image
     print(build_command)
@@ -171,7 +177,7 @@ def build_image(tags, basic=False):
     if basic:
         # push all the tags
         for tagging in tagging_list:
-            push_command = "docker push {}".format(tagging)
+            push_command = f"docker push {tagging}"
             print(push_command)
             subprocess.run(push_command, shell=True)
 
@@ -203,20 +209,20 @@ def main():
         if args.forced and any(v == version_number for v in args.forced):
             # if so, add to list of missing versions
             if not args.check:
-                print("Version {} forcefully added.".format(version_number))
+                print(f"Version {version_number} forcefully added.")
             missing_versions.append(version)
 
         # check if the version number exists in any of the releases from my repo
         elif not any(v["name"] == version_number for v in my_versions):
             # if not, add to list of missing versions
             if not args.check:
-                print("Version {} missing.".format(version_number))
+                print(f"Version {version_number} missing.")
             missing_versions.append(version)
 
         # else, skip
         else:
             if not args.check:
-                print("Version {} found.".format(version_number))
+                print(f"Version {version_number} found.")
 
     # if there are missing versions, process them
     if missing_versions and not args.dry and not args.check:
@@ -238,7 +244,7 @@ def main():
 
             if args.forced:
                 # delete an existing release
-                print("Deleting release for version {}".format(version_number))
+                print(f"Deleting release for version {version_number}")
                 delete_release(repo, version_number)
 
                 # also delete the tag
@@ -246,7 +252,7 @@ def main():
                 delete_tag(repo, version_number)
 
             # update the Dockerfile
-            print("Updating Dockerfile for version {}".format(version_number))
+            print(f"Updating Dockerfile for version {version_number}")
             update_dockerfile(version_number)
 
             # commit the changes to the file
