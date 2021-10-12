@@ -3,7 +3,7 @@ FROM docker.io/library/php:7.4-apache
 ARG BUILD_DATE
 ARG VCS_REF
 
-ENV WEBTREES_VERSION=2.0.17
+ENV WEBTREES_VERSION=2.0.16
 ENV WEBTREES_HOME="/var/www/webtrees"
 
 RUN apt-get update
