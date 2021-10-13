@@ -237,6 +237,10 @@ def main():
         g = github.Github(TOKEN)
         repo = g.get_repo(MY_REPO)
 
+        # needed so the highest version goes last, and overwrites
+        # the latest tag
+        missing_versions = sorted(missing_versions, key=lambda d: d["name"])
+
         for version in missing_versions:
             version_number = version["name"]
             version_prerelease = version["prerelease"]
