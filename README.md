@@ -208,8 +208,8 @@ changes in your database:
 mysql -u webtrees -p
 
 use webtrees;
-update wt_site_setting set setting_value='https://example.com/login.php' where setting_name='LOGIN_URL';
-update wt_site_setting set setting_value='http://example.com/' where setting_name='SERVER_URL';
+update wt_site_setting set setting_value='https://example.com/login' where setting_name='LOGIN_URL';
+update wt_site_setting set setting_value='https://example.com/' where setting_name='SERVER_URL';
 quit;
 ```
 
