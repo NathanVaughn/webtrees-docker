@@ -221,7 +221,7 @@ This image is available from 3 different registries. Choose whichever you want:
 
  - [docker.io/nathanvaughn/webtrees](https://hub.docker.com/r/nathanvaughn/webtrees)
  - [ghcr.io/nathanvaughn/webtrees](https://github.com/users/nathanvaughn/packages/container/package/webtrees)
- - [cr.nthnv.me/webtrees](https://cr.nthnv.me/repository/library/webtrees) (experimental)
+ - [cr.nthnv.me/library/webtrees](https://cr.nthnv.me/harbor/projects/1/repositories/webtrees) (experimental)
 
 ## Inspiration
 
