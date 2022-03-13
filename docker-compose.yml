@@ -6,10 +6,10 @@ services:
       - db
     environment:
       PRETTY_URLS: "1"
-      HTTPS: "1"
-      HTTPS_REDIRECT: "1"
+      HTTPS: "0"
+      HTTPS_REDIRECT: "0"
       LANG: "en-US"
-      BASE_URL: "https://webtrees.example.com"
+      BASE_URL: "http://localhost"
       DB_TYPE: "mysql"
       DB_HOST: "db"
       DB_PORT: "3306"
@@ -21,8 +21,8 @@ services:
       WT_NAME: "Full Name"
       WT_PASS: "mybadpassword"
       WT_EMAIL: "me@example.com"
-    image: ghcr.io/nathanvaughn/webtrees:latest
-    #build: .
+    # image: ghcr.io/nathanvaughn/webtrees:latest
+    build: .
     ports:
       - 80:80
       - 443:443
@@ -33,12 +33,11 @@ services:
       - app_media:/var/www/webtrees/media/
 
   db:
-    command: "--default-authentication-plugin=mysql_native_password"
     environment:
-      MYSQL_DATABASE: "webtrees"
-      MYSQL_USER: "webtrees"
-      MYSQL_ROOT_PASSWORD: "badpassword"
-      MYSQL_PASSWORD: "badpassword"
+      MARIADB_DATABASE: "webtrees"
+      MARIADB_USER: "webtrees"
+      MARIADB_ROOT_PASSWORD: "badpassword"
+      MARIADB_PASSWORD: "badpassword"
     image: mariadb:latest
     restart: unless-stopped
     volumes:

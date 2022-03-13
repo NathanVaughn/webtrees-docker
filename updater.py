@@ -1,4 +1,5 @@
 import argparse
+import datetime
 import getpass
 import json
 import os
@@ -35,7 +36,7 @@ def get_latest_versions(
     # parse json
     json_data = json.loads(data.read().decode())
     # only get the latest items
-    latest_releases = json_data[0:number]
+    latest_releases = json_data[:number]
 
     # skip releases with no assets
     if check_assets:
@@ -104,7 +105,7 @@ def update_dockerfile(version: str) -> None:
 def commit_changes(repo: github.Repository.Repository, version: str) -> None:
     """Commit and push changes to a repository"""
     # get the blob SHA of the file we're updating
-    sha = repo.get_contents("Dockerfile").sha
+    sha = repo.get_contents("Dockerfile").sha # type: ignore
     # read the local contents in
     with open("Dockerfile", "r") as f:
         content = f.read()
@@ -158,17 +159,19 @@ def build_image(tags: List[str], basic: bool = False) -> None:
     # - ghcr.io/nathanvaughn/webtrees:2.0.0
     tagging_list = []
     for image in IMAGES:
-        for tag in tags:
-            tagging_list.append(f"{image}:{tag}")
+        tagging_list.extend(f"{image}:{tag}" for tag in tags)
 
     # join everything together into a big command with a --tag for each tag
     tagging_cmd = " ".join(f"--tag {tagging}" for tagging in tagging_list)
 
+    vcs_ref = subprocess.check_call(["git", "rev-parse", "--short", "HEAD"])
+    build_date = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
+
     # prepare the building command
     if basic:
-        build_command = f'docker build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` {tagging_cmd}'
+        build_command = f'docker build . --build-arg BUILD_DATE={build_date} --build-arg VCS_REF={vcs_ref} {tagging_cmd}'
     else:
-        build_command = f'docker buildx build . --push --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --platform {PLATFORMS} {tagging_cmd}'
+        build_command = f'docker buildx build . --push --build-arg BUILD_DATE={build_date} --build-arg VCS_REF={vcs_ref} --platform {PLATFORMS} {tagging_cmd}'
 
     # build the image
     print(build_command)

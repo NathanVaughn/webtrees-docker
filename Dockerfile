@@ -6,15 +6,17 @@ ARG VCS_REF
 ENV WEBTREES_VERSION=2.1.0-alpha.2
 ENV WEBTREES_HOME="/var/www/webtrees"
 
+WORKDIR $WEBTREES_HOME
+
 RUN apt-get update
-# break this installs into smaller, 100MB chunks
+# break the installs into smaller, 100MB chunks
 RUN apt-get install -y \
       curl \
       g++ \
-      git \
       locales \
       locales-all \
       mariadb-client \
+      python3 \
       unzip \
       --no-install-recommends
 RUN apt-get install -y \
@@ -55,14 +57,11 @@ COPY apache/ /etc/apache2/sites-available/
 RUN a2enmod rewrite && a2enmod ssl
 
 # entrypoint
-COPY docker-entrypoint.sh /
-RUN chmod +x /docker-entrypoint.sh
+COPY docker-entrypoint.py /
 
 # healthcheck
 COPY docker-healthcheck.sh /
 RUN chmod +x /docker-healthcheck.sh
-
-WORKDIR $WEBTREES_HOME
 
 EXPOSE 80
 EXPOSE 443
@@ -70,7 +69,7 @@ EXPOSE 443
 VOLUME ["$WEBTREES_HOME/data", "$WEBTREES_HOME/media"]
 
 HEALTHCHECK CMD /docker-healthcheck.sh
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ENTRYPOINT ["python3", "/docker-entrypoint.py"]
 
 LABEL org.label-schema.schema-version="1.0" \
       org.label-schema.build-date=$BUILD_DATE \
