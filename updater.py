@@ -255,7 +255,7 @@ def main():
                 delete_release(repo, version_number)
 
                 # also delete the tag
-                print("Deleting tag {}".format(version_number))
+                print(f"Deleting tag {version_number}")
                 delete_tag(repo, version_number)
 
             # update the Dockerfile

@@ -41,7 +41,7 @@ def get_env(
     if key in os.environ:
         value = os.environ[key]
 
-        print(f"{key} found in environment variables: {value}")
+        print(f"{key} found in environment variables")
         return value
 
     # try to find file version of variable
@@ -57,7 +57,7 @@ def get_env(
         with open(os.environ[file_key], "r") as f:
             value = f.read().strip()
 
-        print(f"{file_key} found in environment variables: {value}")
+        print(f"{file_key} found in environment variables")
         return value
 
     # try to find alternate variable
@@ -70,33 +70,36 @@ def get_env(
     return default
 
 
-def replace_line(filepath: str, src: str, replacement: str) -> None:
+def set_config_value(key: str, value: str) -> None:
     """
-    In a given file, find a line starting with the given src, and replace the line
-    with the replacement.
+    In the config file, make sure the given key is set to the given value.
     """
-    print2(f"Replacing line starting with '{src}' with '{replacement}' in {filepath}")
-
-    if not os.path.isfile(filepath):
-        print2(f"WARNING: {filepath} does not exist")
+    if not os.path.isfile(CONFIG_FILE):
+        print2(f"WARNING: {CONFIG_FILE} does not exist")
         return
 
     # read file
-    with open(filepath, "r") as fp:
+    with open(CONFIG_FILE, "r") as fp:
         lines = fp.readlines()
 
     # replace matching line
+    replacement = f'{key}="{value}"'
+    found = False
+
     for i, line in enumerate(lines):
-        if line.startswith(src):
+        if line.startswith(key):
             if line == replacement:
-                print2(f"{filepath} already contains the correct line")
                 return
 
             lines[i] = replacement
+            found = True
             break
 
+    if not found:
+        lines.append(replacement)
+
     # write new contents
-    with open(filepath, "w") as fp:
+    with open(CONFIG_FILE, "w") as fp:
         fp.writelines(lines)
 
 
@@ -160,13 +163,22 @@ def setup_wizard():
             return
 
         print2("Updating config file")
-        replace_line(CONFIG_FILE, "dbhost=", f"dbhost={db_host}")
-        replace_line(CONFIG_FILE, "dbport=", f"dbport={db_port}")
-        replace_line(CONFIG_FILE, "dbuser=", f"dbuser={db_user}")
-        replace_line(CONFIG_FILE, "dbpass=", f"dbpass={db_pass}")
-        replace_line(CONFIG_FILE, "dbname=", f"dbname={db_name}")
-        replace_line(CONFIG_FILE, "tblpfx=", f"tblpfx={table_prefix}")
-        replace_line(CONFIG_FILE, "base_url=", f"base_url={base_url}")
+
+        assert db_host is not None
+        assert db_port is not None
+        assert db_user is not None
+        assert db_pass is not None
+        assert db_name is not None
+        assert table_prefix is not None
+        assert base_url is not None
+
+        set_config_value("dbhost", db_host)
+        set_config_value("dbport", db_port)
+        set_config_value("dbuser", db_user)
+        set_config_value("dbpass", db_pass)
+        set_config_value("dbname", db_name)
+        set_config_value("tblpfx", table_prefix)
+        set_config_value("base_url", base_url)
 
     else:
         print2("Config file does NOT exist")
@@ -249,14 +261,8 @@ def setup_wizard():
 
 def pretty_urls():
     print2("Configuring pretty URLs")
-
-    # can't do anything if file does not exist
-    if not os.path.isfile(CONFIG_FILE):
-        print2(f"WARNING: {CONFIG_FILE} does not exist")
-        return
-
-    replacement = str(int(truish(get_env("PRETTY_URLS"))))
-    replace_line(CONFIG_FILE, "rewrite_urls=", f"rewrite_urls={replacement}")
+    value = str(int(truish(get_env("PRETTY_URLS"))))
+    set_config_value("rewrite_urls", value)
 
 
 def https():
