@@ -8,8 +8,10 @@ ENV WEBTREES_HOME="/var/www/webtrees"
 
 WORKDIR $WEBTREES_HOME
 
+# break the layers into smaller, 100MB chunks
 RUN apt-get update
-# break the installs into smaller, 100MB chunks
+
+# install basic pre-reqs
 RUN apt-get install -y \
       curl \
       g++ \
@@ -19,6 +21,7 @@ RUN apt-get install -y \
       python3 \
       unzip \
       --no-install-recommends
+# install libraries for compilation
 RUN apt-get install -y \
       libfreetype6-dev \
       libicu-dev \
@@ -29,20 +32,24 @@ RUN apt-get install -y \
       libpq-dev \
       libzip-dev \
       zlib1g-dev \
-      --no-install-recommends \
- && rm -rf /var/lib/apt/lists/*
+      --no-install-recommends
+# install php extensions
 RUN pecl install imagick \
  && docker-php-ext-enable imagick \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql zip intl gd exif
+# install webtrees and disable version update prompt
 RUN curl -s -L https://github.com/fisharebest/webtrees/releases/download/${WEBTREES_VERSION}/webtrees-${WEBTREES_VERSION}.zip -o webtrees.zip \
  && unzip -q webtrees.zip -d /var/www/ && rm webtrees.zip \
  && chown -R www-data:www-data $WEBTREES_HOME \
  && perl -0777 -i -pe 's/public\s+function\s+isUpgradeAvailable[\S\s]+?{[\S\s]+?}/public function isUpgradeAvailable(){ return false; }/' $WEBTREES_HOME/app/Services/UpgradeService.php
+# remove old apt stopp
 RUN apt-get purge g++ make zip unzip -y \
  && apt-get autoremove -y \
  && apt-get clean \
- && rm -rf /var/tmp/* /etc/apache2/sites-enabled/000-*.conf
+ && rm -rf /var/tmp/* /etc/apache2/sites-enabled/000-*.conf /var/lib/apt/lists/*
+# enable apache modules
+RUN a2enmod rewrite && a2enmod ssl
 
 # for perl
 ENV LC_ALL en_US.UTF-8
@@ -53,8 +60,6 @@ ENV LANGUAGE en_US.UTF-8
 COPY php.ini /usr/local/etc/php/php.ini
 COPY .htaccess $WEBTREES_HOME
 COPY apache/ /etc/apache2/sites-available/
-
-RUN a2enmod rewrite && a2enmod ssl
 
 # entrypoint
 COPY docker-entrypoint.py /
