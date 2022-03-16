@@ -105,7 +105,7 @@ def update_dockerfile(version: str) -> None:
 def commit_changes(repo: github.Repository.Repository, version: str) -> None:
     """Commit and push changes to a repository"""
     # get the blob SHA of the file we're updating
-    sha = repo.get_contents("Dockerfile").sha # type: ignore
+    sha = repo.get_contents("Dockerfile").sha  # type: ignore
     # read the local contents in
     with open("Dockerfile", "r") as f:
         content = f.read()
@@ -164,14 +164,13 @@ def build_image(tags: List[str], basic: bool = False) -> None:
     # join everything together into a big command with a --tag for each tag
     tagging_cmd = " ".join(f"--tag {tagging}" for tagging in tagging_list)
 
-    vcs_ref = subprocess.check_call(["git", "rev-parse", "--short", "HEAD"])
-    build_date = datetime.datetime.utcnow().strftime("%Y-%m-%dT%H:%M:%SZ")
-
     # prepare the building command
     if basic:
-        build_command = f'docker build . --build-arg BUILD_DATE={build_date} --build-arg VCS_REF={vcs_ref} {tagging_cmd}'
+        build_command = f"docker build . {tagging_cmd}"
     else:
-        build_command = f'docker buildx build . --push --build-arg BUILD_DATE={build_date} --build-arg VCS_REF={vcs_ref} --platform {PLATFORMS} {tagging_cmd}'
+        build_command = (
+            f"docker buildx build . --push --platform {PLATFORMS} {tagging_cmd}"
+        )
 
     # build the image
     print(build_command)
