@@ -75,6 +75,7 @@ jobs:
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
           build-args: WEBTREES_VERSION=${{ matrix.webtrees_version }}
+          push: true
 
       - name: Create Tag
         uses: mathieudutour/github-tag-action@v6
