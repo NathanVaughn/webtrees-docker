@@ -29,24 +29,24 @@ the default value will be used.
 > under "Server information". Either lock down the control panel
 > to administrators, or use the webtrees setup wizard.
 
-| Environment Variable               | Required | Default    | Notes                                                                                                                                                                                                           |
-| ---------------------------------- | -------- | ---------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `PRETTY_URLS`                      | No       | None       | Setting this to any value will enable [pretty URLs](https://webtrees.net/faq/urls/). This can be toggled at any time.                                                                                           |
-| `HTTPS` or `SSL`                   | No       | None       | Setting this to any value will enable HTTPS. In this case, you _must_ mount a directory containing `webtrees.crt` and `webtrees.key` certificates to the directory `/certs/`. For example: `-v ~/certs:/certs/` |
-| `HTTPS_REDIRECT` or `SSL_REDIRECT` | No       | None       | Setting this to any value will enable a _permanent_ 301 redirect to HTTPS . Leaving this off will allow webtrees to be accessed over HTTP, but not automatically redirected to HTTPS.                           |
-| `LANG`                             | No       | `en-us`    | webtrees localization setting. This takes a locale code. Examples: <https://wpastra.com/docs/complete-list-wordpress-locale-codes/>                                                                             |
-| `BASE_URL`                         | Yes      | None       | Base URL of the installation, with protocol. This needs to be in the form of `http://webtrees.example.com`                                                                                                      |
-| `DB_TYPE`                          | No       | `mysql`    | Database server type. See [below](#database) for valid values.                                                                                                                                                  |
-| `DB_HOST`                          | Yes      | None       | Database server host.                                                                                                                                                                                           |
-| `DB_PORT`                          | No       | `3306`     | Database server port.                                                                                                                                                                                           |
-| `DB_USER` or `MYSQL_USER`          | No       | `webtrees` | Database server username.                                                                                                                                                                                       |
-| `DB_PASS` or `MYSQL_PASSWORD`      | Yes      | None       | Database server password.                                                                                                                                                                                       |
-| `DB_NAME` or `MYSQL_DATABASE`      | No       | `webtrees` | Database name.                                                                                                                                                                                                  |
-| `DB_PREFIX`                        | No       | `wt_`      | Prefix to give all tables in the database. Set this to a value of `""` to have no table prefix.                                                                                                                 |
-| `WT_USER`                          | Yes      | None       | First admin account username. Note, this is only used the first time the container is run, and the database is initialized.                                                                                     |
-| `WT_NAME`                          | Yes      | None       | First admin account full name. Note, this is only used the first time the container is run, and the database is initialized.                                                                                    |
-| `WT_PASS`                          | Yes      | None       | First admin account password. Note, this is only used the first time the container is run, and the database is initialized.                                                                                     |
-| `WT_EMAIL`                         | Yes      | None       | First admin account email. Note, this is only used the first time the container is run, and the database is initialized.                                                                                        |
+| Environment Variable                                | Required | Default    | Notes                                                                                                                                                                                                                                       |
+| --------------------------------------------------- | -------- | ---------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `PRETTY_URLS`                                       | No       | None       | Setting this to any truthy value (`True`, `1`, `yes`) will enable [pretty URLs](https://webtrees.net/faq/urls/). This can be toggled at any time.                                                                                           |
+| `HTTPS` or `SSL`                                    | No       | None       | Setting this to any truthy value (`True`, `1`, `yes`) will enable HTTPS. In this case, you _must_ mount a directory containing `webtrees.crt` and `webtrees.key` certificates to the directory `/certs/`. For example: `-v ~/certs:/certs/` |
+| `HTTPS_REDIRECT` or `SSL_REDIRECT`                  | No       | None       | Setting this to any truthy value (`True`, `1`, `yes`) will enable a _permanent_ 301 redirect to HTTPS . Leaving this off will allow webtrees to be accessed over HTTP, but not automatically redirected to HTTPS.                           |
+| `LANG`                                              | Yes      | `en-us`    | webtrees localization setting. This takes a locale code. Examples: <https://wpastra.com/docs/complete-list-wordpress-locale-codes/>                                                                                                         |
+| `BASE_URL`                                          | Yes      | None       | Base URL of the installation, with protocol. This needs to be in the form of `http://webtrees.example.com`                                                                                                                                  |
+| `DB_TYPE`                                           | Yes      | `mysql`    | Database server type. See [below](#database) for valid values.                                                                                                                                                                              |
+| `DB_HOST`                                           | Yes      | None       | Database server host.                                                                                                                                                                                                                       |
+| `DB_PORT`                                           | Yes      | `3306`     | Database server port.                                                                                                                                                                                                                       |
+| `DB_USER` or `MYSQL_USER` or `MARIADB_USER`         | Yes      | `webtrees` | Database server username.                                                                                                                                                                                                                   |
+| `DB_PASS` or `MYSQL_PASSWORD` or `MARIADB_PASSWORD` | Yes      | None       | Database server password.                                                                                                                                                                                                                   |
+| `DB_NAME` or `MYSQL_DATABASE` or `MARIADB_DATABASE` | Yes      | `webtrees` | Database name.                                                                                                                                                                                                                              |
+| `DB_PREFIX`                                         | Yes      | `wt_`      | Prefix to give all tables in the database. Set this to a value of `""` to have no table prefix.                                                                                                                                             |
+| `WT_USER`                                           | Yes      | None       | First admin account username. Note, this is only used the first time the container is run, and the database is initialized.                                                                                                                 |
+| `WT_NAME`                                           | Yes      | None       | First admin account full name. Note, this is only used the first time the container is run, and the database is initialized.                                                                                                                |
+| `WT_PASS`                                           | Yes      | None       | First admin account password. Note, this is only used the first time the container is run, and the database is initialized.                                                                                                                 |
+| `WT_EMAIL`                                          | Yes      | None       | First admin account email. Note, this is only used the first time the container is run, and the database is initialized.                                                                                                                    |
 
 Additionally, you can add `_FILE` to the end of any environment variable name,
 and instead that will read the value in from the given filename.
@@ -64,8 +64,8 @@ webtrees [recommends](https://webtrees.net/install/requirements/)
 a MySQL (or compatible equivalent) database.
 You will need a separate container for this.
 
--   [MariaDB](https://hub.docker.com/_/mariadb)
--   [MySQL](https://hub.docker.com/_/mysql)
+- [MariaDB](https://hub.docker.com/_/mariadb)
+- [MySQL](https://hub.docker.com/_/mysql)
 
 PostgreSQL and SQLite are additionally both supported by webtrees and this image, but
 are not recommended. This image does not support Microsoft SQL Server, in order
@@ -76,15 +76,15 @@ to support multiple architectures. See issue:
 
 If you want to use a SQLite database, set the following values:
 
--   `DB_TYPE` to `sqlite`
--   `DB_NAME` to `desiredfilename`. Do not include any extension.
+- `DB_TYPE` to `sqlite`
+- `DB_NAME` to `desiredfilename`. Do not include any extension.
 
 #### PostgreSQL Values
 
 If you want to use a PostreSQL database, set the following values:
 
--   `DB_TYPE` to `pgsql`
--   `DB_PORT` to `5432`
+- `DB_TYPE` to `pgsql`
+- `DB_PORT` to `5432`
 
 All other values are just like a MySQL database.
 
@@ -92,8 +92,8 @@ All other values are just like a MySQL database.
 
 The image mounts:
 
--   `/var/www/webtrees/data/`
--   `/var/www/webtrees/media/`
+- `/var/www/webtrees/data/`
+- `/var/www/webtrees/media/`
 
 If you want to add custom [themes or modules](https://webtrees.net/download/modules),
 you can also mount the `/var/www/webtrees/modules_v4/` directory.
@@ -219,11 +219,6 @@ For more info, see [this](https://webtrees.net/admin/proxy/).
 
 This image is available from 3 different registries. Choose whichever you want:
 
- - [docker.io/nathanvaughn/webtrees](https://hub.docker.com/r/nathanvaughn/webtrees)
- - [ghcr.io/nathanvaughn/webtrees](https://github.com/users/nathanvaughn/packages/container/package/webtrees)
- - [cr.nthnv.me/library/webtrees](https://cr.nthnv.me/harbor/projects/1/repositories/webtrees) (experimental)
-
-## Inspiration
-
-The Dockerfile is heavily based off
-[solidnerd/docker-bookstack](https://github.com/solidnerd/docker-bookstack).
+- [docker.io/nathanvaughn/webtrees](https://hub.docker.com/r/nathanvaughn/webtrees)
+- [ghcr.io/nathanvaughn/webtrees](https://github.com/users/nathanvaughn/packages/container/package/webtrees)
+- [cr.nthnv.me/library/webtrees](https://cr.nthnv.me/harbor/projects/1/repositories/webtrees) (experimental)

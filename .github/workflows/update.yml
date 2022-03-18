@@ -34,7 +34,6 @@ jobs:
         python3 -m pip install -r requirements.txt
 
     - name: Check For Updates
-      #run: echo "::set-env name=WT_UPDATE::$(python3 updater.py --check)"
       run: echo "WT_UPDATE=$(python3 updater.py --check)" >> $GITHUB_ENV
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -44,7 +43,6 @@ jobs:
 
     - name: Determine Week
       if: env.WT_UPDATE == 'true'
-      # run: echo "::set-env name=WEEK::$(date +%V)"
       run: echo "WEEK=$(date +%V)" >> $GITHUB_ENV
 
     - name: Cache Docker Layers
@@ -98,4 +96,4 @@ jobs:
       run: python3 updater.py
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        #BUILDX_PLATFORMS: ${{ steps.buildx.outputs.platforms }}
+        # BUILDX_PLATFORMS: ${{ steps.buildx.outputs.platforms }}

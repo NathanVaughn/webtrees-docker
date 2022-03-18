@@ -5,7 +5,7 @@ import os
 import subprocess
 import sys
 import urllib.request
-from typing import List, Tuple
+from typing import List
 
 import github
 import github.Repository
@@ -35,7 +35,7 @@ def get_latest_versions(
     # parse json
     json_data = json.loads(data.read().decode())
     # only get the latest items
-    latest_releases = json_data[0:number]
+    latest_releases = json_data[:number]
 
     # skip releases with no assets
     if check_assets:
@@ -104,7 +104,7 @@ def update_dockerfile(version: str) -> None:
 def commit_changes(repo: github.Repository.Repository, version: str) -> None:
     """Commit and push changes to a repository"""
     # get the blob SHA of the file we're updating
-    sha = repo.get_contents("Dockerfile").sha
+    sha = repo.get_contents("Dockerfile").sha  # type: ignore
     # read the local contents in
     with open("Dockerfile", "r") as f:
         content = f.read()
@@ -158,17 +158,18 @@ def build_image(tags: List[str], basic: bool = False) -> None:
     # - ghcr.io/nathanvaughn/webtrees:2.0.0
     tagging_list = []
     for image in IMAGES:
-        for tag in tags:
-            tagging_list.append(f"{image}:{tag}")
+        tagging_list.extend(f"{image}:{tag}" for tag in tags)
 
     # join everything together into a big command with a --tag for each tag
     tagging_cmd = " ".join(f"--tag {tagging}" for tagging in tagging_list)
 
     # prepare the building command
     if basic:
-        build_command = f'docker build . --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` {tagging_cmd}'
+        build_command = f"docker build . {tagging_cmd}"
     else:
-        build_command = f'docker buildx build . --push --build-arg BUILD_DATE=`date -u +"%Y-%m-%dT%H:%M:%SZ"` --build-arg VCS_REF=`git rev-parse --short HEAD` --platform {PLATFORMS} {tagging_cmd}'
+        build_command = (
+            f"docker buildx build . --push --platform {PLATFORMS} {tagging_cmd}"
+        )
 
     # build the image
     print(build_command)
@@ -212,17 +213,14 @@ def main():
                 print(f"Version {version_number} forcefully added.")
             missing_versions.append(version)
 
-        # check if the version number exists in any of the releases from my repo
-        elif not any(v["name"] == version_number for v in my_versions):
+        elif all(v["name"] != version_number for v in my_versions):
             # if not, add to list of missing versions
             if not args.check:
                 print(f"Version {version_number} missing.")
             missing_versions.append(version)
 
-        # else, skip
-        else:
-            if not args.check:
-                print(f"Version {version_number} found.")
+        elif not args.check:
+            print(f"Version {version_number} found.")
 
     # if there are missing versions, process them
     if missing_versions and not args.dry and not args.check:
@@ -252,7 +250,7 @@ def main():
                 delete_release(repo, version_number)
 
                 # also delete the tag
-                print("Deleting tag {}".format(version_number))
+                print(f"Deleting tag {version_number}")
                 delete_tag(repo, version_number)
 
             # update the Dockerfile
