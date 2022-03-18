@@ -1,30 +1,30 @@
-name: Test and Lint
+name: Build and Lint
 
 on:
   pull_request:
     paths:
-    - Dockerfile
+      - Dockerfile
 
 jobs:
   build:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Build
-      run: docker build .
+      - name: Build
+        run: docker build --build-arg WEBTREES_VERSION=2.0.21 .
 
   lint:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout
-      uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v3
 
-    - name: Lint
-      uses: hadolint/hadolint-action@v1.6.0
-      with:
-        dockerfile: Dockerfile
-        failure-threshold: error
+      - name: Lint
+        uses: hadolint/hadolint-action@v1.6.0
+        with:
+          dockerfile: Dockerfile
+          failure-threshold: error
