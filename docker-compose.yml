@@ -38,7 +38,7 @@ services:
       MARIADB_USER: "webtrees"
       MARIADB_ROOT_PASSWORD: "badpassword"
       MARIADB_PASSWORD: "badpassword"
-    image: mariadb:latest
+    image: docker.io/library/mariadb:latest
     restart: unless-stopped
     volumes:
       - db_data:/var/lib/mysql
