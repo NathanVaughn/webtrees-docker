@@ -1,8 +1,5 @@
 FROM docker.io/library/php:7.4-apache
 
-ARG BUILD_DATE
-ARG VCS_REF
-
 ENV WEBTREES_HOME="/var/www/webtrees"
 WORKDIR $WEBTREES_HOME
 
