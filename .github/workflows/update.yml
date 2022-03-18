@@ -2,98 +2,84 @@ name: Check and Push Updates
 
 on:
   schedule:
-    - cron:  '0 12 * * *'
+    - cron: "0 12 * * *"
   workflow_dispatch:
 
 jobs:
-  main:
-
+  getversions:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v3
-      with:
-        ref: master
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    - name: Cache Pip
-      uses: actions/cache@v2
-      id: cache-pip
-      with:
-        path: ~/.cache/pip
-        key: pip-${{ hashFiles('**/requirements.txt') }}
+      - name: Setup Python 3.10
+        uses: actions/setup-python@v3
+        with:
+          python-version: 3.10
 
-    - name: Setup Python 3.8
-      uses: actions/setup-python@v3
-      with:
-        python-version: 3.8
+      - name: Check For Updates
+        run: echo "::set-output name=matrix::$(python3 updater.py)"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Install pip Requirements
-      run: |
-        python3 -m pip install pip wheel --upgrade
-        python3 -m pip install -r requirements.txt
+  buildversions:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix: ${{ fromJSON(needs.getversions.outputs.matrix) }}
 
-    - name: Check For Updates
-      run: echo "WT_UPDATE=$(python3 updater.py --check)" >> $GITHUB_ENV
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
 
-    # Only run the following if update(s) are needed
-    # Set by the 'WT_UPDATE' environment variable being 'true'
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v1
+        with:
+          platforms: all
 
-    - name: Determine Week
-      if: env.WT_UPDATE == 'true'
-      run: echo "WEEK=$(date +%V)" >> $GITHUB_ENV
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v1
+        with:
+          version: latest
 
-    - name: Cache Docker Layers
-      if: env.WT_UPDATE == 'true'
-      uses: actions/cache@v2
-      with:
-        path: /tmp/.buildx-cache
-        key: buildx-${ WEEK }
+      - name: Dockerhub Login
+        uses: docker/login-action@v1
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
-    - name: Set up QEMU
-      if: env.WT_UPDATE == 'true'
-      uses: docker/setup-qemu-action@v1
-      with:
-        platforms: all
+      - name: Github CR Login
+        uses: docker/login-action@v1
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-    - name: Set up Docker Buildx
-      if: env.WT_UPDATE == 'true'
-      uses: docker/setup-buildx-action@v1.6.0
-      with:
-        version: latest
+      - name: nthnv.me CR Login
+        uses: docker/login-action@v1
+        with:
+          registry: cr.nthnv.me
+          username: ${{ secrets.NTHNVCR_USERNAME }}
+          password: ${{ secrets.NTHNVCR_PASSWORD }}
 
-    - name: Create Builder
-      if: env.WT_UPDATE == 'true'
-      run: docker buildx create --use --name build --node build --driver-opt network=host
+      - name: Build and push
+        uses: docker/build-push-action@v2
+        with:
+          tags: ${{ matrix.images }}
+          platforms: linux/amd64,linux/arm/v7,linux/arm64
+          cache-from: type=local,src=/tmp/.buildx-cache
+          cache-to: type=local,dest=/tmp/.buildx-cache
+          build-args: WEBTREES_VERSION=${{ matrix.webtrees_version }}
 
-    - name: Dockerhub Login
-      if: env.WT_UPDATE == 'true'
-      uses: docker/login-action@v1
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_PASSWORD }}
+      - name: Create tag
+        uses: mathieudutour/github-tag-action@v6
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          custom_tag : ${{ matrix.webtrees_version }}
 
-    - name: Github CR Login
-      if: env.WT_UPDATE == 'true'
-      uses: docker/login-action@v1
-      with:
-        registry: ghcr.io
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: nthnv.me CR Login
-      if: env.WT_UPDATE == 'true'
-      uses: docker/login-action@v1
-      with:
-        registry: cr.nthnv.me
-        username: ${{ secrets.NTHNVCR_USERNAME }}
-        password: ${{ secrets.NTHNVCR_PASSWORD }}
-
-    - name: Run Updater Script
-      if: env.WT_UPDATE == 'true'
-      run: python3 updater.py
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        # BUILDX_PLATFORMS: ${{ steps.buildx.outputs.platforms }}
+      - name: Create release
+        uses: softprops/action-gh-release@v1
+        with:
+          prelease: ${{ matrix.prerelease }}
+          tag_name: ${{ matrix.webtrees_version }}
+          body: "Automated release for webtrees version ${{ matrix.webtrees_version }}: ${{ matrix.src_url }}"

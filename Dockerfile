@@ -27,7 +27,7 @@ RUN apt-get purge gcc g++ make -y \
  && rm -rf /var/tmp/* /etc/apache2/sites-enabled/000-*.conf /var/lib/apt/lists/*
 
 # install webtrees and disable version update prompt
-ENV WEBTREES_VERSION=2.0.21
+ARG WEBTREES_VERSION
 RUN curl -s -L https://github.com/fisharebest/webtrees/releases/download/${WEBTREES_VERSION}/webtrees-${WEBTREES_VERSION}.zip -o webtrees.zip \
  && unzip -q webtrees.zip -d /var/www/ && rm webtrees.zip \
  && chown -R www-data:www-data ./ \
