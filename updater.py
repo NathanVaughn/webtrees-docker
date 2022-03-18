@@ -1,12 +1,11 @@
 import argparse
-import datetime
 import getpass
 import json
 import os
 import subprocess
 import sys
 import urllib.request
-from typing import List, Tuple
+from typing import List
 
 import github
 import github.Repository

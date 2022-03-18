@@ -41,7 +41,7 @@ def get_env(
     if key in os.environ:
         value = os.environ[key]
 
-        print(f"{key} found in environment variables")
+        print2(f"{key} found in environment variables")
         return value
 
     # try to find file version of variable
@@ -57,7 +57,7 @@ def get_env(
         with open(os.environ[file_key], "r") as f:
             value = f.read().strip()
 
-        print(f"{file_key} found in environment variables")
+        print2(f"{file_key} found in environment variables")
         return value
 
     # try to find alternate variable
@@ -67,13 +67,19 @@ def get_env(
                 return a
 
     # return default value
+    print2(f"{key} NOT found in environment variables, using default: {default}")
     return default
 
 
-def set_config_value(key: str, value: str) -> None:
+def set_config_value(key: str, value: Optional[str]) -> None:
     """
     In the config file, make sure the given key is set to the given value.
     """
+    if value is None:
+        return
+
+    print2(f"Setting value for {key} in config")
+
     if not os.path.isfile(CONFIG_FILE):
         print2(f"WARNING: {CONFIG_FILE} does not exist")
         return
@@ -83,7 +89,7 @@ def set_config_value(key: str, value: str) -> None:
         lines = fp.readlines()
 
     # replace matching line
-    replacement = f'{key}="{value}"'
+    replacement = f'{key}="{value}"\n'
     found = False
 
     for i, line in enumerate(lines):
@@ -111,16 +117,18 @@ def enable_apache_site(
     """
     all_sites = ["webtrees", "webtrees-redir", "webtrees-ssl"]
 
+    # perl complains about locale to stderr, so disable that
+
     # disable the other sites
     for s in all_sites:
         if s not in enable_sites:
             print2(f"Disabling site {s}")
-            subprocess.check_call(["a2dissite", s])
+            subprocess.check_call(["a2dissite", s], stderr=subprocess.DEVNULL)
 
     # enable the desired sites
     for s in enable_sites:
         print2(f"Enabling site {s}")
-        subprocess.check_call(["a2ensite", s])
+        subprocess.check_call(["a2ensite", s], stderr=subprocess.DEVNULL)
 
 
 def perms():
@@ -130,6 +138,9 @@ def perms():
     subprocess.check_call(["chmod", "-R", "755", "data"])
     subprocess.check_call(["chown", "-R", "www-data:www-data", "media"])
     subprocess.check_call(["chmod", "-R", "755", "media"])
+
+    if os.path.isfile(CONFIG_FILE):
+        subprocess.check_call(["chmod", "700", CONFIG_FILE])
 
 
 def setup_wizard():
@@ -157,21 +168,27 @@ def setup_wizard():
     if os.path.isfile(CONFIG_FILE):
         print2("Config file already exists")
 
-        # make sure all the variables we need are set
-        if not all([db_host, db_port, db_user, db_pass, db_name, base_url]):
-            print2("WARNING: Not all required variables were found for config update")
+        # make sure all the variables we need are not set to None
+        try:
+            if db_type in ["mysql", "pgsql"]:
+                assert db_host is not None
+                assert db_port is not None
+                assert db_user is not None
+                assert db_pass is not None
+            elif db_type == "sqlite":
+                assert db_name is not None
+                db_host = ""
+                db_port = ""
+                db_user = ""
+                db_pass = ""
+            else:
+                raise ValueError(f"Unknown database type: {db_type}")
+
+        except AssertionError:
+            print2("WARNING: Not all required variables were found for database update")
             return
 
         print2("Updating config file")
-
-        assert db_host is not None
-        assert db_port is not None
-        assert db_user is not None
-        assert db_pass is not None
-        assert db_name is not None
-        assert table_prefix is not None
-        assert base_url is not None
-
         set_config_value("dbhost", db_host)
         set_config_value("dbport", db_port)
         set_config_value("dbuser", db_user)
@@ -183,28 +200,39 @@ def setup_wizard():
     else:
         print2("Config file does NOT exist")
 
-        # make sure all the variables we need are set
-        if not all(
-            [
-                lang,
-                db_type,
-                db_host,
-                db_port,
-                db_user,
-                db_pass,
-                db_name,
-                base_url,
-                wt_name,
-                wt_user,
-                wt_pass,
-                wt_email,
-            ]
-        ):
+        # make sure all the variables we need are not set to None
+        try:
+            assert lang is not None
+            assert table_prefix is not None
+            assert base_url is not None
+
+            assert wt_name is not None
+            assert wt_user is not None
+            assert wt_pass is not None
+            assert wt_email is not None
+
+            assert db_type is not None
+            assert db_name is not None
+
+            if db_type in ["mysql", "pgsql"]:
+                assert db_host is not None
+                assert db_port is not None
+                assert db_user is not None
+                assert db_pass is not None
+            elif db_type == "sqlite":
+                assert db_name is not None
+                db_host = ""
+                db_port = ""
+                db_user = ""
+                db_pass = ""
+            else:
+                raise ValueError(f"Unknown database type: {db_type}")
+
+        except AssertionError:
             print2("WARNING: Not all required variables were found for setup wizard")
             return
 
         print2("Automating setup wizard")
-
         print2("Starting Apache in background")
         # set us up to a known HTTP state
         enable_apache_site(["webtrees"])
@@ -236,14 +264,14 @@ def setup_wizard():
             urlencode(
                 {
                     "lang": lang,
+                    "tblpfx": table_prefix,
+                    "baseurl": base_url,
                     "dbtype": db_type,
                     "dbhost": db_host,
                     "dbport": db_port,
                     "dbuser": db_user,
                     "dbpass": db_pass,
                     "dbname": db_name,
-                    "tblpfx": table_prefix,
-                    "baseurl": base_url,
                     "wtname": wt_name,
                     "wtuser": wt_user,
                     "wtpass": wt_pass,
@@ -301,6 +329,7 @@ def main():
     pretty_urls()
     https()
     htaccess()
+    perms()
 
     print2("Starting Apache")
     subprocess.run(["apache2-foreground"])
