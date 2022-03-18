@@ -91,9 +91,10 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
         }
         return_data["include"].append(version_data)
 
-    print(json.dumps(return_data))
+    output = json.dumps(return_data).replace('"', '\\"')
+    print(output)
     # debugging
-    print(json.dumps(return_data), file=sys.stderr)
+    print(output, file=sys.stderr)
 
 
 if __name__ == "__main__":
