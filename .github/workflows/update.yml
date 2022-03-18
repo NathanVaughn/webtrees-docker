@@ -18,12 +18,11 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: Check For Updates
+      - name: Get Versions
         run: echo "::set-output name=matrix::$(python3 versionchecker.py)"
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
   buildversions:
+    if: ${{ fromJSON(needs.getversions.outputs.matrix).include[0] }}
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJSON(needs.getversions.outputs.matrix) }}
@@ -62,7 +61,7 @@ jobs:
           username: ${{ secrets.NTHNVCR_USERNAME }}
           password: ${{ secrets.NTHNVCR_PASSWORD }}
 
-      - name: Build and push
+      - name: Build and Push
         uses: docker/build-push-action@v2
         with:
           tags: ${{ matrix.images }}
@@ -71,13 +70,13 @@ jobs:
           cache-to: type=local,dest=/tmp/.buildx-cache
           build-args: WEBTREES_VERSION=${{ matrix.webtrees_version }}
 
-      - name: Create tag
+      - name: Create Tag
         uses: mathieudutour/github-tag-action@v6
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           custom_tag : ${{ matrix.webtrees_version }}
 
-      - name: Create release
+      - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
           prelease: ${{ matrix.prerelease }}
