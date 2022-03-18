@@ -91,11 +91,7 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
         }
         return_data["include"].append(version_data)
 
-    output = json.dumps(return_data).replace('"', '\\"')
-    print(output)
-    # debugging
-    print(output, file=sys.stderr)
-
+    print(json.dumps(return_data))
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
