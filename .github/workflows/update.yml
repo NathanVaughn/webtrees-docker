@@ -27,7 +27,7 @@ jobs:
           echo "::set-output name=matrix::$(python3 versionchecker.py)"
 
   buildversions:
-    if: ${{ fromJSON(needs.getversions.outputs.matrix).include != [] }}
+    if: ${{ fromJSON(needs.getversions.outputs.matrix).include[0] != null }}
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJSON(needs.getversions.outputs.matrix) }}
