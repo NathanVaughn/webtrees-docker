@@ -213,17 +213,14 @@ def main():
                 print(f"Version {version_number} forcefully added.")
             missing_versions.append(version)
 
-        # check if the version number exists in any of the releases from my repo
-        elif not any(v["name"] == version_number for v in my_versions):
+        elif all(v["name"] != version_number for v in my_versions):
             # if not, add to list of missing versions
             if not args.check:
                 print(f"Version {version_number} missing.")
             missing_versions.append(version)
 
-        # else, skip
-        else:
-            if not args.check:
-                print(f"Version {version_number} found.")
+        elif not args.check:
+            print(f"Version {version_number} found.")
 
     # if there are missing versions, process them
     if missing_versions and not args.dry and not args.check:
