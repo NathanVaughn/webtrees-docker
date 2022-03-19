@@ -21,8 +21,8 @@ services:
       WT_NAME: "Full Name"
       WT_PASS: "mybadpassword"
       WT_EMAIL: "me@example.com"
-    # image: ghcr.io/nathanvaughn/webtrees:2.0.21
-    build: .
+    image: ghcr.io/nathanvaughn/webtrees:2.0.21
+    # build: .
     ports:
       - 80:80
       # - 443:443
