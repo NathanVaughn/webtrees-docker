@@ -86,6 +86,6 @@ jobs:
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          prelease: ${{ matrix.prerelease }}
+          prerelease: ${{ matrix.prerelease }}
           tag_name: ${{ matrix.webtrees_version }}
           body: "Automated release for webtrees version ${{ matrix.webtrees_version }}: ${{ matrix.src_url }}"
