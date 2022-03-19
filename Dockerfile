@@ -11,7 +11,6 @@ RUN apt-get install -y \
     libpq-dev \
     libzip-dev \
     mariadb-client \
-    patch \
     python3 \
     unzip \
     --no-install-recommends
