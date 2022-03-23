@@ -4,6 +4,7 @@ on:
   pull_request:
     paths:
       - Dockerfile
+      - .github/workflows/test.yml
 
 jobs:
   build:
