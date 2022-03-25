@@ -88,4 +88,6 @@ jobs:
         with:
           prerelease: ${{ matrix.prerelease }}
           tag_name: ${{ matrix.webtrees_version }}
-          body: "Automated release for webtrees version ${{ matrix.webtrees_version }}: ${{ matrix.src_url }}"
+          body: |
+            Automated release for webtrees version ${{ matrix.webtrees_version }}: ${{ matrix.src_url }}
+            Tags pushed: ${{ matrix.images }}
