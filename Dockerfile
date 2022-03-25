@@ -4,26 +4,27 @@ ENV WEBTREES_HOME="/var/www/webtrees"
 WORKDIR $WEBTREES_HOME
 
 # install pre-reqs
-RUN apt-get update
-RUN apt-get install -y \
-    curl \
-    libmagickwand-dev \
-    libpq-dev \
-    libzip-dev \
-    mariadb-client \
-    python3 \
-    unzip \
-    --no-install-recommends
+RUN apt-get update \
+ && apt-get install -y \
+    curl=7.74.0-1.3+deb11u1 \
+    libmagickwand-dev=8:6.9.11.60+dfsg-1.3 \
+    libpq-dev=13.5-0+deb11u1 \
+    libzip-dev=1.7.3-1 \
+    mariadb-client=1:10.5.12-0+deb11u1 \
+    python3=3.9.2-3 \
+    unzip=6.0-26 \
+    --no-install-recommends \
+ && rm -rf /var/lib/apt/lists/*
 # install php extensions
 RUN pecl install imagick \
  && docker-php-ext-enable imagick \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install -j$(nproc) pdo pdo_mysql pdo_pgsql zip intl gd exif
+ && docker-php-ext-install -j"$(nproc)" pdo pdo_mysql pdo_pgsql zip intl gd exif
 # remove old apt stuff
 RUN apt-get purge gcc g++ make -y \
  && apt-get autoremove -y \
  && apt-get clean \
- && rm -rf /var/tmp/* /etc/apache2/sites-enabled/000-*.conf /var/lib/apt/lists/*
+ && rm -rf /var/tmp/* /etc/apache2/sites-enabled/000-*.conf
 
 # install webtrees and disable version update prompt
 # https://www.webtrees.net/index.php/fr/forum/help-for-2-0/36616-email-error-after-update-to-2-0-21#89985

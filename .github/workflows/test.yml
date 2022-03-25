@@ -28,4 +28,4 @@ jobs:
         uses: hadolint/hadolint-action@v2.0.0
         with:
           dockerfile: Dockerfile
-          failure-threshold: error
+          failure-threshold: info
