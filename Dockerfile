@@ -6,13 +6,13 @@ WORKDIR $WEBTREES_HOME
 # install pre-reqs
 RUN apt-get update \
  && apt-get install -y \
-    curl=7.74.0-1.3+deb11u1 \
-    libmagickwand-dev=8:6.9.11.60+dfsg-1.3 \
-    libpq-dev=13.5-0+deb11u1 \
-    libzip-dev=1.7.3-1 \
-    mariadb-client=1:10.5.12-0+deb11u1 \
-    python3=3.9.2-3 \
-    unzip=6.0-26 \
+    curl \
+    libmagickwand-dev \
+    libpq-dev \
+    libzip-dev \
+    mariadb-client \
+    python3 \
+    unzip \
     --no-install-recommends \
  && rm -rf /var/lib/apt/lists/*
 # install php extensions
