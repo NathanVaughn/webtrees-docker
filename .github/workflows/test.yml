@@ -29,3 +29,4 @@ jobs:
         with:
           dockerfile: Dockerfile
           failure-threshold: info
+          ignore: DL3008
