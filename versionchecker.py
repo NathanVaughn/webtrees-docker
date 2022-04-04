@@ -14,6 +14,9 @@ BASE_IMAGES = [
     "cr.nthnv.me/library/webtrees",
 ]
 
+# used to use 'name' of release, but this has started being blank
+VERSION_KEY = "tag_name"
+
 
 def get_latest_versions(
     repo: str, number: int = 5, check_assets: bool = False
@@ -66,7 +69,7 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
 
     # go through each version of webtrees
     for wt_version in wt_versions:
-        wt_version_number = wt_version["name"]
+        wt_version_number = wt_version[VERSION_KEY]
 
         # check if version is a forced one
         if wt_version_number in forced_versions:
@@ -75,7 +78,7 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
             missing_versions.append(wt_version)
 
         # check if version is not in my repo
-        elif all(v["name"] != wt_version_number for v in my_versions):
+        elif all(v[VERSION_KEY] != wt_version_number for v in my_versions):
             # if not, add to list of missing versions
             print(f"Version {wt_version_number} missing.", file=sys.stderr)
             missing_versions.append(wt_version)
@@ -84,8 +87,8 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
     return_data = {"include": []}
     for m_version in missing_versions:
         version_data = {
-            "images": ",".join(get_tags(m_version["name"])),
-            "webtrees_version": m_version["name"],
+            "images": ",".join(get_tags(m_version[VERSION_KEY])),
+            "webtrees_version": m_version[VERSION_KEY],
             "prerelease": m_version["prerelease"],
             "src_url": m_version["html_url"],
         }
