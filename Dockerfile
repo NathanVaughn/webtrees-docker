@@ -1,4 +1,4 @@
-FROM docker.io/library/php:7.4-apache
+FROM docker.io/library/php:8.1-apache
 
 ENV WEBTREES_HOME="/var/www/webtrees"
 WORKDIR $WEBTREES_HOME

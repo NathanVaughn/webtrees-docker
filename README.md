@@ -159,12 +159,6 @@ webtrees will automatically prefer it over `gd` with no configuration.
 
 ## Tags
 
-> **🚨 WARNING 🚨**
-> If you use the 2.X.X or **beta** versions of webtrees,
-> you will **_NOT_** be able to use the
-> 1.X.X version again. The database schema between these versions are
-> very different, and this is a one-way operation.
-
 ### Specific Versions
 
 Each stable, legacy, beta, and alpha release version of webtrees
@@ -173,19 +167,23 @@ produces a version-tagged build of the Docker container.
 Example:
 
 ```yml
-image: ghcr.io/nathanvaughn/webtrees:1.7.15
+image: ghcr.io/nathanvaughn/webtrees:2.1.2
 ```
 
 ### Latest
 
-Currently, the tags `latest` and `latest-legacy` are available for the latest
-stable and legacy versions of webtrees, respectively.
+Currently, the tags `latest`, `latest-alpha`, `latest-beta`  and `latest-legacy`
+are available for the latest stable, alpha, beta and legacy versions of webtrees,
+respectively.
 
 Example:
 
 ```yml
-image: ghcr.io/nathanvaughn/webtrees:latest-legacy
+image: ghcr.io/nathanvaughn/webtrees:latest
 ```
+
+> ** Note **
+> Legacy versions of webtrees are no longer supported.
 
 ## Issues
 

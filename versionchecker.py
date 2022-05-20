@@ -86,6 +86,10 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
     # build output json
     return_data = {"include": []}
     for m_version in missing_versions:
+        # dropping support for any legacy updates
+        if m_version[VERSION_KEY].startswith("1."):
+            continue
+
         version_data = {
             "images": ",".join(get_tags(m_version[VERSION_KEY])),
             "webtrees_version": m_version[VERSION_KEY],
