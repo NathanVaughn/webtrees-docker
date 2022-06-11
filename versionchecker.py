@@ -3,7 +3,7 @@ import json
 import os
 import sys
 import urllib.request
-from typing import List, Optional
+from typing import Dict, List, Optional
 
 WEBTREES_REPO = "fisharebest/webtrees"
 MY_REPO = os.getenv("GITHUB_REPOSITORY", default="nathanvaughn/webtrees-docker")
@@ -13,6 +13,12 @@ BASE_IMAGES = [
     "ghcr.io/nathanvaughn/webtrees",
     "cr.nthnv.me/library/webtrees",
 ]
+
+WEBTREES_PHP = {
+    "1.": "7.4",
+    "2.0": "7.4",
+    "2.1": "8.1"
+}
 
 # used to use 'name' of release, but this has started being blank
 VERSION_KEY = "tag_name"
@@ -43,60 +49,87 @@ def get_latest_versions(
     return latest_releases
 
 
-def get_tags(version_number: str) -> List[str]:
+def get_tags(versions: List[str]) -> Dict[str, List[str]]:
     """
     Create a list of tags for a given version number
     """
-    if "alpha" in version_number:
-        end_tag = "latest-alpha"
-    elif "beta" in version_number:
-        end_tag = "latest-beta"
-    elif version_number.startswith("1."):
-        end_tag = "latest-legacy"
-    else:
-        end_tag = "latest"
+    # dict of list of tags to return
+    versions_tags = {}
 
-    end_tag_list = [end_tag, version_number]
-    return [f"{base_image}:{tag}" for tag in end_tag_list for base_image in BASE_IMAGES]
+    # all tags seen, so we don't duplicate
+    tags_seen = set()
+
+    # sort descending to work from newest to oldest
+    for version in sorted(versions, reverse=True):
+        tag_list = [version]
+
+        if version.startswith("1."):
+            tag = "latest-1"
+        elif version.startswith("2.0"):
+            tag = "latest-2.0"
+        else:
+            tag = "latest"
+
+        if "alpha" in version:
+            tag += "-alpha"
+        elif "beta" in version:
+            tag += "-beta"
+
+        # check against our list of all tags seen to make sure we don't have duplicates
+        if tag not in tags_seen:
+            tag_list.append(tag)
+            tags_seen.add(tag)
+
+        versions_tags[version] = ([f"{base_image}:{t}" for t in tag_list for base_image in BASE_IMAGES])
+
+    return versions_tags
 
 
 def main(forced_versions: Optional[List[str]] = None) -> None:
     # get the latest versions of each repo
-    wt_versions = get_latest_versions(WEBTREES_REPO, check_assets=True)
-    my_versions = get_latest_versions(MY_REPO, 20)
+    wt_version_dicts = get_latest_versions(WEBTREES_REPO, 20, check_assets=True)
+    my_version_dicts = get_latest_versions(MY_REPO, 20)
 
-    missing_versions = []
+    missing_version_dicts = []
 
     # go through each version of webtrees
-    for wt_version in wt_versions:
-        wt_version_number = wt_version[VERSION_KEY]
+    for wt_version_dict in wt_version_dicts:
+        wt_version = wt_version_dict[VERSION_KEY]
+
+        # dropped support for legacy images
+        if wt_version.startswith("1."):
+            continue
 
         # check if version is a forced one
-        if wt_version_number in forced_versions:
+        if wt_version in forced_versions:
             # if so, add to list of missing versions
-            print(f"Version {wt_version_number} forcefully added.", file=sys.stderr)
-            missing_versions.append(wt_version)
+            print(f"Version {wt_version} forcefully added.", file=sys.stderr)
+            missing_version_dicts.append(wt_version_dict)
 
         # check if version is not in my repo
-        elif all(v[VERSION_KEY] != wt_version_number for v in my_versions):
+        elif all(v[VERSION_KEY] != wt_version for v in my_version_dicts):
             # if not, add to list of missing versions
-            print(f"Version {wt_version_number} missing.", file=sys.stderr)
-            missing_versions.append(wt_version)
+            print(f"Version {wt_version} missing.", file=sys.stderr)
+            missing_version_dicts.append(wt_version_dict)
+
+    # build authoritative list of all tags we're going to produce
+    all_tags = get_tags([v[VERSION_KEY] for v in missing_version_dicts])
 
     # build output json
     return_data = {"include": []}
-    for m_version in missing_versions:
-        # dropping support for any legacy updates
-        if m_version[VERSION_KEY].startswith("1."):
-            continue
 
+    for missing_version_dict in missing_version_dicts:
         version_data = {
-            "images": ",".join(get_tags(m_version[VERSION_KEY])),
-            "webtrees_version": m_version[VERSION_KEY],
-            "prerelease": m_version["prerelease"],
-            "src_url": m_version["html_url"],
+            "images": ",".join(all_tags[missing_version_dict[VERSION_KEY]]),
+            "webtrees_version": missing_version_dict[VERSION_KEY],
+            "php_version": next(value for key, value in WEBTREES_PHP.items() if missing_version_dict[VERSION_KEY].startswith(key)),
+            "prerelease": missing_version_dict["prerelease"],
+            "src_url": missing_version_dict["html_url"],
         }
         return_data["include"].append(version_data)
+
+    # import pprint
+    # pprint.pprint(return_data)
 
     print(json.dumps(return_data))
 

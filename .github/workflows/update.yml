@@ -4,6 +4,11 @@ on:
   schedule:
     - cron: "0 12 * * *"
   workflow_dispatch:
+    inputs:
+      forced:
+        type: string
+        required: false
+        description: "Space-seperated version numbers to force update of"
 
 jobs:
   getversions:
@@ -24,7 +29,7 @@ jobs:
         id: set-matrix
         run: |
           echo "::echo::on"
-          echo "::set-output name=matrix::$(python3 versionchecker.py)"
+          echo "::set-output name=matrix::$(python3 versionchecker.py --forced ${{ inputs.forced }})"
 
   buildversions:
     needs: getversions
@@ -74,7 +79,9 @@ jobs:
           platforms: linux/amd64,linux/arm/v7,linux/arm64
           cache-from: type=local,src=/tmp/.buildx-cache
           cache-to: type=local,dest=/tmp/.buildx-cache
-          build-args: WEBTREES_VERSION=${{ matrix.webtrees_version }}
+          build-args: |
+            WEBTREES_VERSION=${{ matrix.webtrees_version }}
+            PHP_VERSION=${{ matrix.php_version }}
           push: true
 
       - name: Create Tag
