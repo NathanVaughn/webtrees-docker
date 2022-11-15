@@ -20,6 +20,8 @@ class EnvVars:
     prettyurls: bool
     https: bool
     httpsredirect: bool
+    sslcertfile: str
+    sslcertkeyfile: str
     lang: str
     baseurl: Optional[str]
     dbtype: DBType
@@ -122,6 +124,8 @@ ENV = EnvVars(
     httpsredirect=truish(
         get_environment_variable("HTTPS_REDIRECT", alternates=["SSL_REDIRECT"])
     ),
+    sslcertfile=get_environment_variable("SSL_CERT_FILE", "/certs/webtrees.crt"),
+    sslcertkeyfile=get_environment_variable("SSL_CERT_KEY_FILE", "/certs/webtrees.key"),
     baseurl=get_environment_variable("BASE_URL"),
     lang=get_environment_variable("LANG", "en-US"),
     dbtype=DBType[get_environment_variable("DB_TYPE", "mysql")],
@@ -199,7 +203,33 @@ def enable_apache_site(
     """
     Enable an Apache site.
     """
-    # TODO, accept cert path via env
+
+    # update ssl apache config with cert path from env
+    ssl_site_file = "/etc/apache2/sites-available/webtrees-ssl.conf"
+
+    # make paths absolute
+    if not os.path.isabs(ENV.sslcertfile):
+        ENV.sslcertfile = os.path.join(ROOT, "data", ENV.sslcertfile)
+
+    if not os.path.isabs(ENV.sslcertkeyfile):
+        ENV.sslcertkeyfile = os.path.join(ROOT, "data", ENV.sslcertkeyfile)
+
+    # update file
+    with open(ssl_site_file, "r") as fp:
+        ssl_site_file_lines = fp.readlines()
+
+    new_ssl_site_file_lines = []
+    for line in ssl_site_file_lines:
+        if line.strip().startswith("SSLCertificateFile"):
+            line = line.replace(line.split()[1], ENV.sslcertfile)
+        elif line.strip().startswith("SSLCertificateKeyFile"):
+            line = line.replace(line.split()[1], ENV.sslcertkeyfile)
+
+        new_ssl_site_file_lines.append(line)
+
+    with open(ssl_site_file, "w") as fp:
+        fp.writelines(new_ssl_site_file_lines)
+
     all_sites = ["webtrees", "webtrees-redir", "webtrees-ssl"]
 
     # perl complains about locale to stderr, so disable that
@@ -247,7 +277,7 @@ def check_db_variables() -> bool:
             assert ENV.dbuser is not None
             assert ENV.dbpass is not None
 
-        elif ENV.dbtype ==  DBType.sqlite:
+        elif ENV.dbtype == DBType.sqlite:
             ENV.dbhost = ""
             ENV.dbport = ""
             ENV.dbuser = ""
@@ -280,6 +310,12 @@ def setup_wizard() -> None:
     ):
         print2("WARNING: Not all required variables were found for setup wizard")
         return
+
+    assert ENV.baseurl is not None
+    if not ENV.baseurl.startswith("http"):
+        print2(
+            "WARNING: BASE_URL does not start with 'http'. This is likely not what you want."
+        )
 
     print2("Automating setup wizard")
     print2("Starting Apache in background")
