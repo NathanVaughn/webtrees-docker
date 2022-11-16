@@ -23,7 +23,7 @@ services:
       WT_NAME: "Full Name"
       WT_PASS: "mybadpassword"
       WT_EMAIL: "me@example.com"
-    image: test
+    image: ghcr.io/nathanvaughn/webtrees:latest
     ports:
       - 80:80
       # - 443:443

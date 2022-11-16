@@ -381,9 +381,8 @@ def update_config_file():
     print2("Updating config file")
 
     if not os.path.isfile(CONFIG_FILE):
-        raise FileNotFoundError(
-            f"Config file not found at {CONFIG_FILE}. This should not happen."
-        )
+        print2(f"Config file not found at {CONFIG_FILE}. Nothing to update.")
+        return
 
     # update independent values
     set_config_value("rewrite_urls", str(int(ENV.prettyurls)))
