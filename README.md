@@ -89,7 +89,7 @@ If you want to use a SQLite database, set the following values:
 
 If you want to use a PostreSQL database, set the following values:
 
-- `DB_TYPE` to `pgsql`
+- `DB_TYPE` to `postgres`
 - `DB_PORT` to `5432`
 
 All other values are just like a MySQL database.
@@ -178,7 +178,7 @@ image: ghcr.io/nathanvaughn/webtrees:2.1.2
 
 ### Latest
 
-Currently, the tags `latest`, `latest-alpha`, `latest-beta`  and `latest-legacy`
+Currently, the tags `latest`, `latest-alpha`, `latest-beta` and `latest-legacy`
 are available for the latest stable, alpha, beta and legacy versions of webtrees,
 respectively.
 
