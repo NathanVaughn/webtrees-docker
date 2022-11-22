@@ -42,7 +42,6 @@ RUN curl -s -L https://github.com/fisharebest/webtrees/releases/download/${WEBTR
 RUN a2enmod rewrite && a2enmod ssl && rm -rf /var/www/html
 
 # copy apache/php configs
-COPY php.ini /usr/local/etc/php/php.ini
 COPY .htaccess ./
 COPY apache/ /etc/apache2/sites-available/
 

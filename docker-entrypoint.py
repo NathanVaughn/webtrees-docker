@@ -3,7 +3,7 @@ import subprocess
 import sys
 import time
 from dataclasses import dataclass
-from typing import Any, List, Literal, Optional, overload, TypeVar, Union, Dict
+from typing import Any, List, Literal, Optional, overload, TypeVar, Union
 from urllib import request
 from urllib.parse import urlencode
 from enum import Enum
@@ -11,7 +11,7 @@ from enum import Enum
 
 class DBType(Enum):
     mysql = "mysql"
-    postgres = "pgsql"
+    pgsql = "pgsql"
     sqlite = "sqlite"
 
 
@@ -40,6 +40,11 @@ class EnvVars:
     dbcert: Optional[str]
     dbca: Optional[str]
     dbverify: bool
+    # php settings
+    phpmemorylimit: str
+    phpmaxexecutiontime: str
+    phppostmaxsize: str
+    phpuploadmaxfilesize: str
 
 
 def truish(value: Optional[str]) -> bool:
@@ -132,15 +137,18 @@ ENV = EnvVars(
     dbhost=get_environment_variable("DB_HOST"),
     dbport=get_environment_variable("DB_PORT", "3306"),
     dbuser=get_environment_variable(
-        "DB_USER", "webtrees", alternates=["MYSQL_USER", "MARIADB_USER"]
+        "DB_USER",
+        "webtrees",
+        alternates=["MYSQL_USER", "MARIADB_USER", "POSTGRES_USER"],
     ),
     dbpass=get_environment_variable(
-        "DB_PASS", alternates=["MYSQL_PASSWORD", "MARIADB_PASSWORD"]
+        "DB_PASS",
+        alternates=["MYSQL_PASSWORD", "MARIADB_PASSWORD", "POSTGRES_PASSWORD"],
     ),
     dbname=get_environment_variable(
         "DB_NAME",
         default="webtrees",
-        alternates=["MYSQL_DATABASE", "MARIADB_DATABASE"],
+        alternates=["MYSQL_DATABASE", "MARIADB_DATABASE", "POSTGRES_DB"],
     ),
     tblpfx=get_environment_variable("DB_PREFIX", "wt_"),
     wtuser=get_environment_variable("WT_USER"),
@@ -151,7 +159,12 @@ ENV = EnvVars(
     dbcert=get_environment_variable("DB_CERT"),
     dbca=get_environment_variable("DB_CA"),
     dbverify=truish(get_environment_variable("DB_VERIFY")),
+    phpmemorylimit=get_environment_variable("PHP_MEMORY_LIMIT", "1024M"),
+    phpmaxexecutiontime=get_environment_variable("PHP_MAX_EXECUTION_TIME", "90"),
+    phppostmaxsize=get_environment_variable("PHP_POST_MAX_SIZE", "50M"),
+    phpuploadmaxfilesize=get_environment_variable("PHP_UPLOAD_MAX_FILE_SIZE", "50M"),
 )
+
 
 ROOT = "/var/www/webtrees"
 CONFIG_FILE = os.path.join(ROOT, "data", "config.ini.php")
@@ -262,6 +275,28 @@ def perms() -> None:
         subprocess.check_call(["chmod", "700", CONFIG_FILE])
 
 
+def php_ini() -> None:
+    """
+    Create PHP .ini file
+    """
+    print2("Creating php.ini")
+
+    php_ini_filename = "/usr/local/etc/php/php.ini"
+    os.makedirs(os.path.dirname(php_ini_filename), exist_ok=True)
+
+    with open(php_ini_filename, "w") as fp:
+        fp.writelines(
+            [
+                "[PHP]\n",
+                "\n",
+                f"memory_limit = {ENV.phpmemorylimit}\n",
+                f"max_execution_time = {ENV.phpmaxexecutiontime}\n",
+                f"post_max_size = {ENV.phppostmaxsize}\n",
+                f"upload_max_filesize = {ENV.phpuploadmaxfilesize}\n",
+            ]
+        )
+
+
 def check_db_variables() -> bool:
     """
     Check if all required database variables are present
@@ -271,17 +306,16 @@ def check_db_variables() -> bool:
         assert ENV.dbname is not None
         assert ENV.tblpfx is not None
 
-        if ENV.dbtype in [DBType.mysql, DBType.postgres]:
-            assert ENV.dbhost is not None
-            assert ENV.dbport is not None
-            assert ENV.dbuser is not None
-            assert ENV.dbpass is not None
-
-        elif ENV.dbtype == DBType.sqlite:
+        if ENV.dbtype == DBType.sqlite:
             ENV.dbhost = ""
             ENV.dbport = ""
             ENV.dbuser = ""
             ENV.dbpass = ""
+
+        assert ENV.dbhost is not None
+        assert ENV.dbport is not None
+        assert ENV.dbuser is not None
+        assert ENV.dbpass is not None
 
     except AssertionError:
         print2("WARNING: Not all database variables are set")
@@ -335,7 +369,7 @@ def setup_wizard() -> None:
             print2("Waiting for MySQL server to be ready")
             time.sleep(1)
 
-    elif ENV.dbtype == DBType.postgres:
+    elif ENV.dbtype == DBType.pgsql:
         print2("Waiting 10 seconds arbitrarily for database server to be ready")
         time.sleep(10)
     else:
@@ -374,7 +408,7 @@ def setup_wizard() -> None:
     apache_proc.terminate()
 
 
-def update_config_file():
+def update_config_file() -> None:
     """
     Update the config file with items set via environment variables
     """
@@ -408,7 +442,7 @@ def update_config_file():
         set_config_value("dbverify", str(int(ENV.dbverify)))
 
 
-def https():
+def https() -> None:
     """
     Configure enabled Apache sites
     """
@@ -428,7 +462,7 @@ def https():
         enable_apache_site(["webtrees", "webtrees-ssl"])
 
 
-def htaccess():
+def htaccess() -> None:
     """
     Recreate .htaccess file if it ever deletes itself in the /data/ directory
     """
@@ -445,9 +479,11 @@ def htaccess():
     print2(f"Created {htaccess_file}")
 
 
-def main():
+def main() -> None:
     # first, set up permissions
     perms()
+    # create php config
+    php_ini()
     # run the setup wizard if the config file doesn't exist
     setup_wizard()
     # update the config file

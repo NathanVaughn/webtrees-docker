@@ -17,8 +17,6 @@ services:
       DB_PASS: "badpassword"
       DB_NAME: "webtrees"
       DB_PREFIX: "wt_"
-      SSL_CERT_FILE: "testfile.crt"
-      SSL_CERT_KEY_FILE: "testfile.key"
       WT_USER: "username"
       WT_NAME: "Full Name"
       WT_PASS: "mybadpassword"
@@ -43,6 +41,16 @@ services:
     restart: unless-stopped
     volumes:
       - db_data:/var/lib/mysql
+
+  # db:
+  #   environment:
+  #     POSTGRES_DB: "webtrees"
+  #     POSTGRES_USER: "webtrees"
+  #     POSTGRES_PASSWORD: "badpassword"
+  #   image: docker.io/library/postgres:latest
+  #   restart: unless-stopped
+  #   volumes:
+  #     - db_data:/var/lib/postgresql/data
 
 volumes:
   db_data:
