@@ -11,7 +11,7 @@ MY_REPO = os.getenv("GITHUB_REPOSITORY", default="nathanvaughn/webtrees-docker")
 BASE_IMAGES = [
     "docker.io/nathanvaughn/webtrees",
     "ghcr.io/nathanvaughn/webtrees",
-    "cr.nthnv.me/library/webtrees",
+    # "cr.nthnv.me/library/webtrees",
 ]
 
 WEBTREES_PHP = {
