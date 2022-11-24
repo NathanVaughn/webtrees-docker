@@ -85,14 +85,14 @@ jobs:
           provider: dockerhub
           short_description: ${{ github.event.repository.description }}
 
-      - name: Update Harbor README
-        uses: christian-korneck/update-container-description-action@v1
-        env:
-          DOCKER_USER: ${{ secrets.NTHNVCR_USERNAME }}
-          DOCKER_PASS: ${{ secrets.NTHNVCR_PASSWORD }}
-        with:
-          destination_container_repo: cr.nthnv.me/library/webtrees
-          provider: harbor2
+      # - name: Update Harbor README
+      #   uses: christian-korneck/update-container-description-action@v1
+      #   env:
+      #     DOCKER_USER: ${{ secrets.NTHNVCR_USERNAME }}
+      #     DOCKER_PASS: ${{ secrets.NTHNVCR_PASSWORD }}
+      #   with:
+      #     destination_container_repo: cr.nthnv.me/library/webtrees
+      #     provider: harbor2
 
       - name: Create Tag
         uses: mathieudutour/github-tag-action@v6.1
