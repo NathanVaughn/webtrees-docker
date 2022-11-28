@@ -59,7 +59,7 @@ def truish(value: Optional[str]) -> bool:
 
 def print2(msg: Any) -> None:
     """
-    Print a message to stdout.
+    Print a message to stderr.
     """
     print(f"[NV_INIT] {msg}", file=sys.stderr)
 
@@ -474,7 +474,7 @@ def htaccess() -> None:
     print2(f"WARNING: {htaccess_file} does not exist")
 
     with open(htaccess_file, "w") as fp:
-        fp.writelines(["order allow,deny", "deny from all"])
+        fp.writelines(["order allow,deny\n", "deny from all\n"])
 
     print2(f"Created {htaccess_file}")
 
