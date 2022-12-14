@@ -168,8 +168,42 @@ ENV = EnvVars(
 
 ROOT = "/var/www/webtrees"
 CONFIG_FILE = os.path.join(ROOT, "data", "config.ini.php")
+PHP_INI_FILE = "/usr/local/etc/php/php.ini"
 
 os.chdir(ROOT)
+
+
+def add_line_to_file(filename: str, newline: str) -> None:
+    """
+    Add a new line to a file. If an existing line is found with the same
+    starting string, it will be replaced.
+    """
+    newline += "\n"
+
+    # read file
+    with open(filename, "r") as fp:
+        lines = fp.readlines()
+
+    key = newline.split("=")[0]
+
+    # replace matching line
+    found = False
+
+    for i, line in enumerate(lines):
+        if line.startswith(key):
+            if line == newline:
+                return
+
+            lines[i] = newline
+            found = True
+            break
+
+    if not found:
+        lines.append(newline)
+
+    # write new contents
+    with open(filename, "w") as fp:
+        fp.writelines(lines)
 
 
 def set_config_value(key: str, value: Optional[str]) -> None:
@@ -185,29 +219,15 @@ def set_config_value(key: str, value: Optional[str]) -> None:
         print2(f"WARNING: {CONFIG_FILE} does not exist")
         return
 
-    # read file
-    with open(CONFIG_FILE, "r") as fp:
-        lines = fp.readlines()
+    add_line_to_file(CONFIG_FILE, f'{key}="{value}"')
 
-    # replace matching line
-    replacement = f'{key}="{value}"\n'
-    found = False
 
-    for i, line in enumerate(lines):
-        if line.startswith(key):
-            if line == replacement:
-                return
-
-            lines[i] = replacement
-            found = True
-            break
-
-    if not found:
-        lines.append(replacement)
-
-    # write new contents
-    with open(CONFIG_FILE, "w") as fp:
-        fp.writelines(lines)
+def set_php_ini_value(key: str, value: str) -> None:
+    """
+    In the php.ini file, make sure the given key is set to the given value.
+    """
+    print2(f"Setting value for {key} in php.ini")
+    add_line_to_file(PHP_INI_FILE, f"{key} = {value}")
 
 
 def enable_apache_site(
@@ -277,24 +297,21 @@ def perms() -> None:
 
 def php_ini() -> None:
     """
-    Create PHP .ini file
+    Update PHP .ini file
     """
-    print2("Creating php.ini")
+    print2("Updating php.ini")
 
-    php_ini_filename = "/usr/local/etc/php/php.ini"
-    os.makedirs(os.path.dirname(php_ini_filename), exist_ok=True)
+    if not os.path.isfile(PHP_INI_FILE):
+        print2("Creating php.ini")
 
-    with open(php_ini_filename, "w") as fp:
-        fp.writelines(
-            [
-                "[PHP]\n",
-                "\n",
-                f"memory_limit = {ENV.phpmemorylimit}\n",
-                f"max_execution_time = {ENV.phpmaxexecutiontime}\n",
-                f"post_max_size = {ENV.phppostmaxsize}\n",
-                f"upload_max_filesize = {ENV.phpuploadmaxfilesize}\n",
-            ]
-        )
+        os.makedirs(os.path.dirname(PHP_INI_FILE), exist_ok=True)
+        with open(PHP_INI_FILE, "w") as fp:
+            fp.writelines(["[PHP]\n", "\n"])
+
+    set_php_ini_value("memory_limit", ENV.phpmemorylimit)
+    set_php_ini_value("max_execution_time", ENV.phpmaxexecutiontime)
+    set_php_ini_value("post_max_size", ENV.phppostmaxsize)
+    set_php_ini_value("upload_max_filesize", ENV.phpuploadmaxfilesize)
 
 
 def check_db_variables() -> bool:
@@ -474,7 +491,7 @@ def htaccess() -> None:
     print2(f"WARNING: {htaccess_file} does not exist")
 
     with open(htaccess_file, "w") as fp:
-        fp.writelines(["order allow,deny\n", "deny from all\n"])
+        fp.writelines(["order allow,deny", "deny from all"])
 
     print2(f"Created {htaccess_file}")
 
