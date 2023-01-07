@@ -5,6 +5,8 @@ import sys
 import urllib.request
 from typing import Dict, List, Optional
 
+from retry import retry
+
 WEBTREES_REPO = "fisharebest/webtrees"
 MY_REPO = os.getenv("GITHUB_REPOSITORY", default="nathanvaughn/webtrees-docker")
 
@@ -14,16 +16,13 @@ BASE_IMAGES = [
     # "cr.nthnv.me/library/webtrees",
 ]
 
-WEBTREES_PHP = {
-    "1.": "7.4",
-    "2.0": "7.4",
-    "2.1": "8.1"
-}
+WEBTREES_PHP = {"1.": "7.4", "2.0": "7.4", "2.1": "8.1"}
 
 # used to use 'name' of release, but this has started being blank
 VERSION_KEY = "tag_name"
 
 
+@retry(tries=5, delay=2, backoff=3)
 def get_latest_versions(
     repo: str, number: int = 5, check_assets: bool = False
 ) -> List[dict]:
@@ -80,7 +79,9 @@ def get_tags(versions: List[str]) -> Dict[str, List[str]]:
             tag_list.append(tag)
             tags_seen.add(tag)
 
-        versions_tags[version] = ([f"{base_image}:{t}" for t in tag_list for base_image in BASE_IMAGES])
+        versions_tags[version] = [
+            f"{base_image}:{t}" for t in tag_list for base_image in BASE_IMAGES
+        ]
 
     return versions_tags
 
@@ -122,7 +123,11 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
         version_data = {
             "images": ",".join(all_tags[missing_version_dict[VERSION_KEY]]),
             "webtrees_version": missing_version_dict[VERSION_KEY],
-            "php_version": next(value for key, value in WEBTREES_PHP.items() if missing_version_dict[VERSION_KEY].startswith(key)),
+            "php_version": next(
+                value
+                for key, value in WEBTREES_PHP.items()
+                if missing_version_dict[VERSION_KEY].startswith(key)
+            ),
             "prerelease": missing_version_dict["prerelease"],
             "src_url": missing_version_dict["html_url"],
         }
@@ -132,6 +137,7 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
     # pprint.pprint(return_data)
 
     print(json.dumps(return_data))
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
