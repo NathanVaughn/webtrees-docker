@@ -32,8 +32,13 @@ def get_latest_versions(
 
     # build url
     url = f"https://api.github.com/repos/{repo}/releases"
+    request = urllib.request.Request(url)
+
+    if os.getenv("GITHUB_TOKEN"):
+        request.add_header("Authorization", f'Bearer {os.environ["GITHUB_TOKEN"]}')
+
     # download data
-    data = urllib.request.urlopen(url)
+    data = urllib.request.urlopen(request)
     # parse json
     json_data = json.loads(data.read().decode())
     # only get the latest items
