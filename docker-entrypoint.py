@@ -2,11 +2,17 @@ import os
 import subprocess
 import sys
 import time
+import urllib.error
 from dataclasses import dataclass
-from typing import Any, List, Literal, Optional, overload, TypeVar, Union
+from enum import Enum
+from typing import Any, List, Literal, Optional, TypeVar, Union, overload
 from urllib import request
 from urllib.parse import urlencode
-from enum import Enum
+
+
+class NoRedirect(request.HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        return None
 
 
 class DBType(Enum):
@@ -394,32 +400,40 @@ def setup_wizard() -> None:
         time.sleep(2)
 
     # send it
-    print2("Sending setup wizard request")
+    url = "http://127.0.0.1:80/"
+    print2(f"Sending setup wizard request to {url}")
 
-    resp = request.urlopen(
-        # use 127.0.0.1 in case user is using host networking mode
-        "http://127.0.0.1:80/",
-        urlencode(
-            {
-                "lang": ENV.lang,
-                "tblpfx": ENV.tblpfx,
-                "baseurl": ENV.baseurl,
-                "dbtype": ENV.dbtype.value,
-                "dbhost": ENV.dbhost,
-                "dbport": ENV.dbport,
-                "dbuser": ENV.dbuser,
-                "dbpass": ENV.dbpass,
-                "dbname": ENV.dbname,
-                "wtname": ENV.wtname,
-                "wtuser": ENV.wtuser,
-                "wtpass": ENV.wtpass,
-                "wtemail": ENV.wtemail,
-                "step": "6",
-            }
-        ).encode("ascii"),
-    )
+    opener = request.build_opener(NoRedirect)
+    request.install_opener(opener)
+    try:
+        resp = request.urlopen(
+            url,
+            urlencode(
+                {
+                    "lang": ENV.lang,
+                    "tblpfx": ENV.tblpfx,
+                    "baseurl": ENV.baseurl,
+                    "dbtype": ENV.dbtype.value,
+                    "dbhost": ENV.dbhost,
+                    "dbport": ENV.dbport,
+                    "dbuser": ENV.dbuser,
+                    "dbpass": ENV.dbpass,
+                    "dbname": ENV.dbname,
+                    "wtname": ENV.wtname,
+                    "wtuser": ENV.wtuser,
+                    "wtpass": ENV.wtpass,
+                    "wtemail": ENV.wtemail,
+                    "step": "6",
+                }
+            ).encode("ascii"),
+        )
+    except urllib.error.HTTPError as e:
+        # If the user has set a BASE_URL with something other than port 80
+        # we get redirected. That means the setup request still went through.
+        resp = e
+        print2(f"Recieved HTTP {resp.status} response")
 
-    assert resp.status == 200
+    assert resp.status in (200, 302)
 
     print2("Stopping Apache")
     apache_proc.terminate()
