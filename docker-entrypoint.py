@@ -121,8 +121,9 @@ def get_environment_variable(
     # try to find alternate variable
     if alternates is not None:
         for a in alternates:
-            if get_environment_variable(a) is not None:
-                return a
+            a_value = get_environment_variable(a)
+            if a_value is not None:
+                return a_value
 
     # return default value
     print2(f"{key} NOT found in environment variables, using default: {default}")
