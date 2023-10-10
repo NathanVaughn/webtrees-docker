@@ -1,56 +1,48 @@
 version: "3"
 
 services:
-  app:
+  webtrees_app:
     depends_on:
-      - db
+      - webtrees_db
     environment:
       PRETTY_URLS: "1"
       HTTPS: "0"
       HTTPS_REDIRECT: "0"
-      LANG: "en-US"
-      BASE_URL: "http://localhost"
+      LANG: "es-ES"
+      BASE_URL: "http://localhost:8084"
       DB_TYPE: "mysql"
-      DB_HOST: "db"
+      DB_HOST: "webtrees_db"
       DB_PORT: "3306"
-      DB_USER: "webtrees"
-      DB_PASS: "badpassword"
-      DB_NAME: "webtrees"
+      MARIADB_USER: "DBUSERhere"
+      MARIADB_PASSWORD: "DBPASShere"
+      MARIADB_DATABASE: "DBNAMEhere"
       DB_PREFIX: "wt_"
-      WT_USER: "username"
-      WT_NAME: "Full Name"
-      WT_PASS: "mybadpassword"
-      WT_EMAIL: "me@example.com"
+      WT_USER: "WTUSERhere"
+      WT_NAME: "WTnamehere"
+      WT_PASS: "WTpasshere"
+      WT_EMAIL: "emailhere@email.com"
     image: ghcr.io/nathanvaughn/webtrees:latest
     ports:
-      - 80:80
-      # - 443:443
+      - 8084:80
+      # - 80443:443
     restart: unless-stopped
     volumes:
       # - ~/certs:/certs/
-      - app_data:/var/www/webtrees/data/
-      - app_media:/var/www/webtrees/media/
+      - ./app_data:/var/www/webtrees/data/
+      - ./app_media:/var/www/webtrees/media/
+      - ./app_themes:/var/www/webtrees/modules_v4/
 
-  db:
+  webtrees_db:
     environment:
-      MARIADB_DATABASE: "webtrees"
-      MARIADB_USER: "webtrees"
-      MARIADB_ROOT_PASSWORD: "badpassword"
-      MARIADB_PASSWORD: "badpassword"
+      MARIADB_DATABASE: "DBNAMEhere"
+      MARIADB_USER: "DBUSERhere"
+      MARIADB_PASSWORD: "DBPASShere"
+      MARIADB_ROOT_PASSWORD: "DBROOTPASShere"
     image: docker.io/library/mariadb:latest
     restart: unless-stopped
     volumes:
-      - db_data:/var/lib/mysql
+      - ./db_data:/var/lib/mysql
 
-  # db:
-  #   environment:
-  #     POSTGRES_DB: "webtrees"
-  #     POSTGRES_USER: "webtrees"
-  #     POSTGRES_PASSWORD: "badpassword"
-  #   image: docker.io/library/postgres:latest
-  #   restart: unless-stopped
-  #   volumes:
-  #     - db_data:/var/lib/postgresql/data
 
 volumes:
   db_data:
@@ -58,4 +50,6 @@ volumes:
   app_data:
     driver: local
   app_media:
+    driver: local
+  app_themes:
     driver: local

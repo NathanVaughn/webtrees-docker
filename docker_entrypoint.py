@@ -177,7 +177,7 @@ ROOT = "/var/www/webtrees"
 CONFIG_FILE = os.path.join(ROOT, "data", "config.ini.php")
 PHP_INI_FILE = "/usr/local/etc/php/php.ini"
 
-os.chdir(ROOT)
+
 
 
 def add_line_to_file(filename: str, newline: str) -> None:
@@ -512,6 +512,8 @@ def htaccess() -> None:
 
 
 def main() -> None:
+    os.chdir(ROOT)
+
     # first, set up permissions
     perms()
     # create php config

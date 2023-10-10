@@ -51,7 +51,7 @@ COPY .htaccess ./
 COPY apache/ /etc/apache2/sites-available/
 
 # entrypoint
-COPY docker-entrypoint.py /
+COPY docker_entrypoint.py /
 
 # healthcheck
 COPY docker-healthcheck.sh /
@@ -62,4 +62,4 @@ EXPOSE 80 443
 VOLUME ["$WEBTREES_HOME/data", "$WEBTREES_HOME/media"]
 
 HEALTHCHECK CMD /docker-healthcheck.sh
-ENTRYPOINT ["python3", "/docker-entrypoint.py"]
+ENTRYPOINT ["python3", "/docker_entrypoint.py"]
