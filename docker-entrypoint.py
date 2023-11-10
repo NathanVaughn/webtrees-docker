@@ -180,6 +180,33 @@ PHP_INI_FILE = "/usr/local/etc/php/php.ini"
 os.chdir(ROOT)
 
 
+def retry_urlopen(url: str, data: bytes) -> None:
+    """
+    Retry a request until a postiive repsonse code is reached. Raises error if it fails.
+    """
+    opener = request.build_opener(NoRedirect)
+    request.install_opener(opener)
+
+    for try_ in range(10):
+        try:
+            # make request
+            resp = request.urlopen(url, data)
+        except urllib.error.HTTPError as e:
+            # capture error as well
+            resp = e
+            print2(f"Recieved HTTP {resp.status} response")
+
+        # check status code
+        # 302 is also accpetable in case the user selected something other than port 80
+        if resp.status in (200, 302):
+            return
+
+        # backoff
+        time.sleep(try_)
+
+    raise RuntimeError(f"Could not send a request to {url}")
+
+
 def add_line_to_file(filename: str, newline: str) -> None:
     """
     Add a new line to a file. If an existing line is found with the same
@@ -404,37 +431,27 @@ def setup_wizard() -> None:
     url = "http://127.0.0.1:80/"
     print2(f"Sending setup wizard request to {url}")
 
-    opener = request.build_opener(NoRedirect)
-    request.install_opener(opener)
-    try:
-        resp = request.urlopen(
-            url,
-            urlencode(
-                {
-                    "lang": ENV.lang,
-                    "tblpfx": ENV.tblpfx,
-                    "baseurl": ENV.baseurl,
-                    "dbtype": ENV.dbtype.value,
-                    "dbhost": ENV.dbhost,
-                    "dbport": ENV.dbport,
-                    "dbuser": ENV.dbuser,
-                    "dbpass": ENV.dbpass,
-                    "dbname": ENV.dbname,
-                    "wtname": ENV.wtname,
-                    "wtuser": ENV.wtuser,
-                    "wtpass": ENV.wtpass,
-                    "wtemail": ENV.wtemail,
-                    "step": "6",
-                }
-            ).encode("ascii"),
-        )
-    except urllib.error.HTTPError as e:
-        # If the user has set a BASE_URL with something other than port 80
-        # we get redirected. That means the setup request still went through.
-        resp = e
-        print2(f"Recieved HTTP {resp.status} response")
-
-    assert resp.status in (200, 302)
+    retry_urlopen(
+        url,
+        urlencode(
+            {
+                "lang": ENV.lang,
+                "tblpfx": ENV.tblpfx,
+                "baseurl": ENV.baseurl,
+                "dbtype": ENV.dbtype.value,
+                "dbhost": ENV.dbhost,
+                "dbport": ENV.dbport,
+                "dbuser": ENV.dbuser,
+                "dbpass": ENV.dbpass,
+                "dbname": ENV.dbname,
+                "wtname": ENV.wtname,
+                "wtuser": ENV.wtuser,
+                "wtpass": ENV.wtpass,
+                "wtemail": ENV.wtemail,
+                "step": "6",
+            }
+        ).encode("ascii"),
+    )
 
     print2("Stopping Apache")
     apache_proc.terminate()
