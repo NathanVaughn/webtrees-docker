@@ -103,7 +103,8 @@ All other values are just like a MySQL database.
 The image mounts:
 
 - `/var/www/webtrees/data/`
-- `/var/www/webtrees/media/`
+
+(media is stored in the `media` subfolder)
 
 If you want to add custom [themes or modules](https://webtrees.net/download/modules),
 you can also mount the `/var/www/webtrees/modules_v4/` directory.
@@ -113,13 +114,10 @@ Example `docker-compose`:
 ```yml
 volumes:
   - app_data:/var/www/webtrees/data/
-  - app_media:/var/www/webtrees/media/
   - app_themes:/var/www/webtrees/modules_v4/
 ---
 volumes:
   app_data:
-    driver: local
-  app_media:
     driver: local
   app_themes:
     driver: local

@@ -59,7 +59,7 @@ RUN chmod +x /docker-healthcheck.sh
 
 # final Docker config
 EXPOSE 80 443
-VOLUME ["$WEBTREES_HOME/data", "$WEBTREES_HOME/media"]
+VOLUME ["$WEBTREES_HOME/data"]
 
 HEALTHCHECK CMD /docker-healthcheck.sh
 ENTRYPOINT ["python3", "/docker-entrypoint.py"]

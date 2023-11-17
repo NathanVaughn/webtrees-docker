@@ -29,7 +29,6 @@ services:
     volumes:
       # - ~/certs:/certs/
       - app_data:/var/www/webtrees/data/
-      - app_media:/var/www/webtrees/media/
 
   db:
     environment:
@@ -56,6 +55,4 @@ volumes:
   db_data:
     driver: local
   app_data:
-    driver: local
-  app_media:
     driver: local
