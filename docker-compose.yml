@@ -29,7 +29,7 @@ services:
     volumes:
       # - ~/certs:/certs/
       - app_data:/var/www/webtrees/data/
-      - app_media:/var/www/webtrees/media/
+      - app_media:/var/www/webtrees/data/media/
 
   db:
     environment:
