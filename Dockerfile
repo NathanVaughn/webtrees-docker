@@ -33,10 +33,9 @@ ARG WEBTREES_VERSION
 COPY UpgradeService.patch /UpgradeService.patch
 RUN curl -s -L https://github.com/fisharebest/webtrees/releases/download/${WEBTREES_VERSION}/webtrees-${WEBTREES_VERSION}.zip -o webtrees.zip \
  && unzip -q webtrees.zip -d /var/www/ && rm webtrees.zip
-RUN chown -R www-data:www-data $WEBTREES_HOME \
 # Disable version update prompt. Webtrees should not be upgrading itself,
 # users should be using tagged container versions
- && patch app/Services/UpgradeService.php /UpgradeService.patch \
+RUN patch app/Services/UpgradeService.php /UpgradeService.patch \
  && rm /UpgradeService.patch \
 # Delete file that caused email issues
 # https://www.webtrees.net/index.php/fr/forum/help-for-2-0/36616-email-error-after-update-to-2-0-21#89985

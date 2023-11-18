@@ -51,6 +51,9 @@ class EnvVars:
     phpmaxexecutiontime: str
     phppostmaxsize: str
     phpuploadmaxfilesize: str
+    # user/group ID
+    puid: str
+    pgid: str
 
 
 def truish(value: Optional[str]) -> bool:
@@ -170,11 +173,14 @@ ENV = EnvVars(
     phpmaxexecutiontime=get_environment_variable("PHP_MAX_EXECUTION_TIME", "90"),
     phppostmaxsize=get_environment_variable("PHP_POST_MAX_SIZE", "50M"),
     phpuploadmaxfilesize=get_environment_variable("PHP_UPLOAD_MAX_FILE_SIZE", "50M"),
+    puid=get_environment_variable("PUID", "33"),  # www-data user
+    pgid=get_environment_variable("PGID", "33"),
 )
 
 
 ROOT = "/var/www/webtrees"
-CONFIG_FILE = os.path.join(ROOT, "data", "config.ini.php")
+DATA_DIR = os.path.join(ROOT, "data")
+CONFIG_FILE = os.path.join(DATA_DIR, "config.ini.php")
 PHP_INI_FILE = "/usr/local/etc/php/php.ini"
 
 os.chdir(ROOT)
@@ -190,6 +196,7 @@ def retry_urlopen(url: str, data: bytes) -> None:
     for try_ in range(10):
         try:
             # make request
+            print2(f"Attempt {try_} for {url}")
             resp = request.urlopen(url, data)
         except urllib.error.HTTPError as e:
             # capture error as well
@@ -276,10 +283,10 @@ def enable_apache_site(
 
     # make paths absolute
     if not os.path.isabs(ENV.sslcertfile):
-        ENV.sslcertfile = os.path.join(ROOT, "data", ENV.sslcertfile)
+        ENV.sslcertfile = os.path.join(DATA_DIR, ENV.sslcertfile)
 
     if not os.path.isabs(ENV.sslcertkeyfile):
-        ENV.sslcertkeyfile = os.path.join(ROOT, "data", ENV.sslcertkeyfile)
+        ENV.sslcertkeyfile = os.path.join(DATA_DIR, ENV.sslcertkeyfile)
 
     # update file
     with open(ssl_site_file, "r") as fp:
@@ -319,11 +326,10 @@ def perms() -> None:
     """
 
     print2("Setting up folder permissions for uploads")
-
-    subprocess.check_call(["chown", "-R", "www-data:www-data", "data"])
-    subprocess.check_call(["chmod", "-R", "755", "data"])
-    subprocess.check_call(["chown", "-R", "www-data:www-data", "media"])
-    subprocess.check_call(["chmod", "-R", "755", "media"])
+    # https://github.com/linuxserver/docker-baseimage-alpine/blob/bef0f4cee208396c92c0fdd1426613de02698301/root/etc/s6-overlay/s6-rc.d/init-adduser/run#L4-L9
+    subprocess.check_call(["groupmod", "-o", "-g", ENV.pgid, "www-data"])
+    subprocess.check_call(["usermod", "-o", "-u", ENV.puid, "www-data"])
+    subprocess.check_call(["chown", "-R", "www-data:www-data", DATA_DIR])
 
     if os.path.isfile(CONFIG_FILE):
         subprocess.check_call(["chmod", "700", CONFIG_FILE])
@@ -515,7 +521,7 @@ def htaccess() -> None:
     """
     Recreate .htaccess file if it ever deletes itself in the /data/ directory
     """
-    htaccess_file = os.path.join(ROOT, "data", ".htaccess")
+    htaccess_file = os.path.join(DATA_DIR, ".htaccess")
 
     if os.path.isfile(htaccess_file):
         return

@@ -21,7 +21,9 @@ services:
       WT_NAME: "Full Name"
       WT_PASS: "mybadpassword"
       WT_EMAIL: "me@example.com"
-    image: ghcr.io/nathanvaughn/webtrees:latest
+      PUID: "1000"
+      PGID: "1000"
+    image: webtrees:test
     ports:
       - 80:80
       # - 443:443
