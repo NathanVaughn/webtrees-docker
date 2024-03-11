@@ -116,7 +116,7 @@ jobs:
           echo "EOF" >> $GITHUB_ENV
 
       - name: Create Release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           prerelease: ${{ matrix.prerelease }}
           tag_name: ${{ matrix.webtrees_version }}
