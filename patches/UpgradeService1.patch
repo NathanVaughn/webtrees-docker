@@ -1,7 +1,7 @@
-diff --git "a/C:\\Users\\nvaug\\Downloads\\webtrees-2.1.16\\webtrees\\app\\Services\\UpgradeService.php" "b/C:\\Users\\nvaug\\Downloads\\webtrees-2.1.16\\webtrees\\app\\Services\\UpgradeServicePatched.php"
+diff --git "a/.\\UpgradeService.php" "b/.\\UpgradeServicePatched.php"
 index b69bea0..c3e682c 100644
---- "a/C:\\Users\\nvaug\\Downloads\\webtrees-2.1.16\\webtrees\\app\\Services\\UpgradeService.php"
-+++ "b/C:\\Users\\nvaug\\Downloads\\webtrees-2.1.16\\webtrees\\app\\Services\\UpgradeServicePatched.php"
+--- "a/.\\UpgradeService.php"
++++ "b/.\\UpgradeServicePatched.php"
 @@ -339,34 +339,6 @@ class UpgradeService
       */
      private function fetchLatestVersion(bool $force): string
@@ -36,4 +36,4 @@ index b69bea0..c3e682c 100644
 -
          return Site::getPreference('LATEST_WT_VERSION');
      }
- 
+

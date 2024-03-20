@@ -3,6 +3,8 @@ import os
 import subprocess
 import sys
 
+from versionchecker import WEBTREES_PATCH, WEBTREES_PHP
+
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE_FILE = os.path.join(ROOT_DIR, "dev", ".last_built_version")
 
@@ -11,12 +13,21 @@ def main(webtrees_version: str) -> None:
     with open(CACHE_FILE, "w") as fp:
         fp.write(f"{webtrees_version}\n")
 
+    if webtrees_version not in WEBTREES_PATCH:
+        patch_ver = WEBTREES_PATCH["default"]
+    else:
+        patch_ver = WEBTREES_PATCH[webtrees_version]
+
     subprocess.run(
         [
             "docker",
             "build",
             "--build-arg",
             f"WEBTREES_VERSION={webtrees_version}",
+            "--build-arg",
+            f"PHP_VERSION={next(v for k, v in WEBTREES_PHP.items() if webtrees_version.startswith(k))}",
+            "--build-arg",
+            f"PATCH_VERSION={patch_ver}",
             "-t",
             "webtrees:test",
             ".",

@@ -81,6 +81,7 @@ jobs:
           build-args: |
             WEBTREES_VERSION=${{ matrix.webtrees_version }}
             PHP_VERSION=${{ matrix.php_version }}
+            PATCH_VERSION=${{ matrix.patch_version }}
           push: true
 
       - name: Update DockerHub README

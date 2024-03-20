@@ -1,0 +1,39 @@
+diff --git "a/.\\UpgradeService.php" "b/.\\UpgradeServicePatched.php"
+index 6bb3504..a630dfb 100644
+--- "a/.\\UpgradeService.php"
++++ "b/.\\UpgradeServicePatched.php"
+@@ -337,34 +337,6 @@ class UpgradeService
+      */
+     private function fetchLatestVersion(bool $force): string
+     {
+-        $last_update_timestamp = (int) Site::getPreference('LATEST_WT_VERSION_TIMESTAMP');
+-
+-        $current_timestamp = time();
+-
+-        if ($force || $last_update_timestamp < $current_timestamp - self::CHECK_FOR_UPDATE_INTERVAL) {
+-            Site::setPreference('LATEST_WT_VERSION_TIMESTAMP', (string) $current_timestamp);
+-
+-            try {
+-                $client = new Client([
+-                    'timeout' => self::HTTP_TIMEOUT,
+-                ]);
+-
+-                $response = $client->get(self::UPDATE_URL, [
+-                    'query' => $this->serverParameters(),
+-                ]);
+-
+-                if ($response->getStatusCode() === StatusCodeInterface::STATUS_OK) {
+-                    Site::setPreference('LATEST_WT_VERSION', $response->getBody()->getContents());
+-                    Site::setPreference('LATEST_WT_VERSION_ERROR', '');
+-                } else {
+-                    Site::setPreference('LATEST_WT_VERSION_ERROR', 'HTTP' . $response->getStatusCode());
+-                }
+-            } catch (GuzzleException $ex) {
+-                // Can't connect to the server?
+-                // Use the existing information about latest versions.
+-                Site::setPreference('LATEST_WT_VERSION_ERROR', $ex->getMessage());
+-            }
+-        }
+ 
+         return Site::getPreference('LATEST_WT_VERSION');
+     }

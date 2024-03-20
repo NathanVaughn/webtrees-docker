@@ -30,11 +30,12 @@ RUN apt-get purge gcc g++ make -y \
  && rm -rf /var/tmp/* /etc/apache2/sites-enabled/000-*.conf
 
 ARG WEBTREES_VERSION
-COPY UpgradeService.patch /UpgradeService.patch
 RUN curl -s -L https://github.com/fisharebest/webtrees/releases/download/${WEBTREES_VERSION}/webtrees-${WEBTREES_VERSION}.zip -o webtrees.zip \
  && unzip -q webtrees.zip -d /var/www/ && rm webtrees.zip
 # Disable version update prompt. Webtrees should not be upgrading itself,
 # users should be using tagged container versions
+ARG PATCH_VERSION
+COPY patches/UpgradeService${PATCH_VERSION}.patch /UpgradeService.patch
 RUN patch app/Services/UpgradeService.php /UpgradeService.patch \
  && rm /UpgradeService.patch \
 # Delete file that caused email issues
