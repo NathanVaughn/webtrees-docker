@@ -13,11 +13,6 @@ def main(webtrees_version: str) -> None:
     with open(CACHE_FILE, "w") as fp:
         fp.write(f"{webtrees_version}\n")
 
-    if webtrees_version not in WEBTREES_PATCH:
-        patch_ver = WEBTREES_PATCH["default"]
-    else:
-        patch_ver = WEBTREES_PATCH[webtrees_version]
-
     subprocess.run(
         [
             "docker",
@@ -27,7 +22,7 @@ def main(webtrees_version: str) -> None:
             "--build-arg",
             f"PHP_VERSION={next(v for k, v in WEBTREES_PHP.items() if webtrees_version.startswith(k))}",
             "--build-arg",
-            f"PATCH_VERSION={patch_ver}",
+            f'PATCH_VERSION={WEBTREES_PATCH.get(webtrees_version, WEBTREES_PATCH["default"])}',
             "-t",
             "webtrees:test",
             ".",

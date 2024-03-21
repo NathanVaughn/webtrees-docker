@@ -134,7 +134,10 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
                 for key, value in WEBTREES_PHP.items()
                 if missing_version_dict[VERSION_KEY].startswith(key)
             ),
-            "patch_version" "prerelease": missing_version_dict["prerelease"],
+            "patch_version": WEBTREES_PATCH.get(
+                missing_version_dict[VERSION_KEY], WEBTREES_PATCH["default"]
+            ),
+            "prerelease": missing_version_dict["prerelease"],
             "src_url": missing_version_dict["html_url"],
         }
         return_data["include"].append(version_data)
