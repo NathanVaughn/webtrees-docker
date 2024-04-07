@@ -12,6 +12,9 @@ jobs:
     env:
       WEBTREES_VERSION: "2.1.18"
 
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -21,6 +24,9 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
 
     steps:
       - name: Checkout

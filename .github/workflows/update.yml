@@ -16,6 +16,9 @@ jobs:
     outputs:
       matrix: ${{ steps.set-matrix.outputs.matrix }}
 
+    permissions:
+      contents: read
+
     steps:
       - name: Checkout Code
         uses: actions/checkout@v4
@@ -35,7 +38,7 @@ jobs:
         id: set-matrix
         run: echo "matrix=$(python3 dev/versionchecker.py --forced ${{ inputs.forced }})" >> $GITHUB_OUTPUT
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}
 
   buildversions:
     needs: getversions
@@ -43,6 +46,10 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix: ${{ fromJSON(needs.getversions.outputs.matrix) }}
+
+    permissions:
+      contents: write
+      packages: write
 
     steps:
       - name: Checkout Code
@@ -110,11 +117,12 @@ jobs:
           custom_tag : ${{ matrix.webtrees_version }}
 
       - name: Build Release Notes
+        id: release_notes
         # https://trstringer.com/github-actions-multiline-strings/
         run: |
-          echo "IMAGE_LIST<<EOF" >> $GITHUB_ENV
-          python3 -c "m='${{ matrix.images }}';[print(f'- {i}') for i in m.split(',')]" >> $GITHUB_ENV
-          echo "EOF" >> $GITHUB_ENV
+          echo "IMAGE_LIST<<EOF" >> $GITHUB_OUTPUT
+          python3 -c "m='${{ matrix.images }}';[print(f'- {i}') for i in m.split(',')]" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
 
       - name: Create Release
         uses: softprops/action-gh-release@v2
@@ -124,4 +132,4 @@ jobs:
           body: |
             Automated release for webtrees version ${{ matrix.webtrees_version }}: ${{ matrix.src_url }}
             Tags pushed:
-            ${{ env.IMAGE_LIST }}
+            ${{ steps.release_notes.outputs.IMAGE_LIST }}
