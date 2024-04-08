@@ -23,7 +23,7 @@ services:
       WT_EMAIL: "me@example.com"
       PUID: "1000"
       PGID: "1000"
-    image: webtrees:test
+    image: ghcr.io/nathanvaughn/webtrees:latest
     ports:
       - 80:80
       # - 443:443
