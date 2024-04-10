@@ -94,8 +94,14 @@ def get_tags(versions: List[str]) -> Dict[str, List[str]]:
 
 def main(forced_versions: Optional[List[str]] = None) -> None:
     # get the latest versions of each repo
-    wt_version_dicts = get_latest_versions(WEBTREES_REPO, 20, check_assets=True)
-    my_version_dicts = get_latest_versions(MY_REPO, 20)
+    wt_version_dicts = get_latest_versions(WEBTREES_REPO, 10, check_assets=True)
+    my_version_dicts = get_latest_versions(MY_REPO, 10)
+
+    with open("wt.json", "w") as f:
+        json.dump([v["tag_name"] for v in wt_version_dicts], f, indent=4)
+
+    with open("my.json", "w") as f:
+        json.dump([v["tag_name"] for v in my_version_dicts], f, indent=4)
 
     missing_version_dicts = []
 
