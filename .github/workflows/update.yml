@@ -56,6 +56,7 @@ jobs:
       platform: ${{ matrix.platform }}
       tags: ${{ matrix.tags }}
       context: docker
+      dockerfile: docker/Dockerfile
       buildargs: |
         WEBTREES_VERSION=${{ matrix.webtrees_version }}
         PHP_VERSION=${{ matrix.php_version }}
