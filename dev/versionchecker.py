@@ -9,11 +9,10 @@ from retry import retry
 
 WEBTREES_REPO = "fisharebest/webtrees"
 MY_REPO = os.getenv("GITHUB_REPOSITORY", default="nathanvaughn/webtrees-docker")
-
+ARCHITECTURES = ["linux/amd64", "linux/arm/v7", "linux/arm64"]
 BASE_IMAGES = [
     "docker.io/nathanvaughn/webtrees",
     "ghcr.io/nathanvaughn/webtrees",
-    # "cr.nthnv.me/library/webtrees",
 ]
 
 WEBTREES_PHP = {"1.": "7.4", "2.0": "7.4", "2.1": "8.1"}
@@ -97,12 +96,6 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
     wt_version_dicts = get_latest_versions(WEBTREES_REPO, 10, check_assets=True)
     my_version_dicts = get_latest_versions(MY_REPO, 10)
 
-    with open("wt.json", "w") as f:
-        json.dump([v["tag_name"] for v in wt_version_dicts], f, indent=4)
-
-    with open("my.json", "w") as f:
-        json.dump([v["tag_name"] for v in my_version_dicts], f, indent=4)
-
     missing_version_dicts = []
 
     # go through each version of webtrees
@@ -129,29 +122,48 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
     all_tags = get_tags([v[VERSION_KEY] for v in missing_version_dicts])
 
     # build output json
-    return_data = {"include": []}
+    builder_list = []
+    releaser_list = []
 
     for missing_version_dict in missing_version_dicts:
-        version_data = {
-            "images": ",".join(all_tags[missing_version_dict[VERSION_KEY]]),
-            "webtrees_version": missing_version_dict[VERSION_KEY],
-            "php_version": next(
-                value
-                for key, value in WEBTREES_PHP.items()
-                if missing_version_dict[VERSION_KEY].startswith(key)
-            ),
-            "patch_version": WEBTREES_PATCH.get(
-                missing_version_dict[VERSION_KEY], WEBTREES_PATCH["default"]
-            ),
-            "prerelease": missing_version_dict["prerelease"],
-            "src_url": missing_version_dict["html_url"],
-        }
-        return_data["include"].append(version_data)
+        ver = missing_version_dict[VERSION_KEY]
 
-    # import pprint
-    # pprint.pprint(return_data)
+        for arch in ARCHITECTURES:
+            builder_list.append(
+                {
+                    "platform": arch,
+                    "tags": ",".join(all_tags[ver]),
+                    "webtrees_version": ver,
+                    "php_version": next(
+                        value
+                        for key, value in WEBTREES_PHP.items()
+                        if ver.startswith(key)
+                    ),
+                    "patch_version": WEBTREES_PATCH.get(ver, WEBTREES_PATCH["default"]),
+                }
+            )
 
-    print(json.dumps(return_data))
+        tag_pretty_list = "\n".join(f"- {tag}" for tag in all_tags[ver])
+        releaser_list.append(
+            {
+                "tag": ver,
+                "prerelease": missing_version_dict["prerelease"],
+                "body": f'Automated release for webtrees version {ver}: {missing_version_dict["html_url"]}\nTags pushed:\n{tag_pretty_list}',
+            }
+        )
+
+    # structure for github actions
+    output_data = {
+        "builder": {"include": builder_list},
+        "releaser": {"include": releaser_list},
+    }
+
+    # save output
+    print(json.dumps(output_data, indent=4))
+
+    if github_output := os.getenv("GITHUB_OUTPUT"):
+        with open(github_output, "w") as fp:
+            fp.write(f"matrixes={json.dumps(output_data)}")
 
 
 if __name__ == "__main__":
