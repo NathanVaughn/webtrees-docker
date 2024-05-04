@@ -27,7 +27,7 @@ def main(webtrees_version: str) -> None:
             "webtrees:test",
             ".",
         ],
-        cwd=ROOT_DIR,
+        cwd=os.path.join(ROOT_DIR, "docker"),
     )
 
 
