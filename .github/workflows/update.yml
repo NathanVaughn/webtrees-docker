@@ -57,6 +57,7 @@ jobs:
       tags: ${{ matrix.tags }}
       context: docker
       dockerfile: docker/Dockerfile
+      dockerhub_reponame: webtrees
       buildargs: |
         WEBTREES_VERSION=${{ matrix.webtrees_version }}
         PHP_VERSION=${{ matrix.php_version }}
