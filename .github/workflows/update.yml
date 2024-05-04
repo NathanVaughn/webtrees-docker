@@ -68,6 +68,7 @@ jobs:
     needs:
       - get-versions
       - build-versions
+    if: ${{ fromJSON(needs.get-versions.outputs.matrixes.builder).include[0] != null }}
 
     strategy:
       matrix: ${{ fromJSON(needs.get-versions.outputs.matrixes.releaser) }}
