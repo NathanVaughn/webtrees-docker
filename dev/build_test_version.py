@@ -3,7 +3,7 @@ import os
 import subprocess
 import sys
 
-from versionchecker import WEBTREES_PATCH, WEBTREES_PHP
+from dev.baker import WEBTREES_PATCH, WEBTREES_PHP
 
 ROOT_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CACHE_FILE = os.path.join(ROOT_DIR, "dev", ".last_built_version")

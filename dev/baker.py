@@ -11,7 +11,7 @@ WEBTREES_REPO = "fisharebest/webtrees"
 MY_REPO = os.getenv("GITHUB_REPOSITORY", default="nathanvaughn/webtrees-docker")
 ARCHITECTURES = ["linux/amd64", "linux/arm/v7", "linux/arm64"]
 BASE_IMAGES = [
-    "docker.io/nathanvaughn/webtrees",
+    "index.docker.io/nathanvaughn/webtrees",
     "ghcr.io/nathanvaughn/webtrees",
 ]
 
@@ -124,13 +124,17 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
     # build output json
     builder_list = []
     releaser_list = []
+    attester_list = []
 
     for missing_version_dict in missing_version_dicts:
         ver = missing_version_dict[VERSION_KEY]
 
         for arch in ARCHITECTURES:
+            attest_id = f"{ver}-{arch}".replace("/", "-")
+
             builder_list.append(
                 {
+                    "attest_id": attest_id,
                     "platform": arch,
                     "tags": ",".join(all_tags[ver]),
                     "webtrees_version": ver,
@@ -142,6 +146,9 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
                     "patch_version": WEBTREES_PATCH.get(ver, WEBTREES_PATCH["default"]),
                 }
             )
+
+            for image in BASE_IMAGES:
+                attester_list.append({"name": image, "attest_id": attest_id})
 
         tag_pretty_list = "\n".join(f"- {tag}" for tag in all_tags[ver])
         releaser_list.append(
@@ -156,6 +163,7 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
     output_data = {
         "builder": {"include": builder_list},
         "releaser": {"include": releaser_list},
+        "attester": {"include": attester_list},
     }
 
     # save output

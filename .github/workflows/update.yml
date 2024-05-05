@@ -11,7 +11,7 @@ on:
         description: "Space-seperated version numbers to force update of"
 
 jobs:
-  get-versions:
+  bake:
     runs-on: ubuntu-latest
 
     permissions:
@@ -41,11 +41,11 @@ jobs:
     outputs:
       matrixes: ${{ steps.script.outputs.matrixes }}
 
-  build-versions:
-    needs: get-versions
-    if: ${{ fromJSON(needs.get-versions.outputs.matrixes.builder).include[0] != null }}
+  build:
+    needs: bake
+    if: ${{ fromJSON(needs.bake.outputs.matrixes).builder.include[0] != null }}
     strategy:
-      matrix: ${{ fromJSON(needs.get-versions.outputs.matrixes.builder) }}
+      matrix: ${{ fromJSON(needs.bake.outputs.matrixes).builder }}
 
     permissions:
       contents: read
@@ -57,7 +57,6 @@ jobs:
       tags: ${{ matrix.tags }}
       context: docker
       dockerfile: docker/Dockerfile
-      dockerhub_reponame: webtrees
       buildargs: |
         WEBTREES_VERSION=${{ matrix.webtrees_version }}
         PHP_VERSION=${{ matrix.php_version }}
@@ -66,14 +65,56 @@ jobs:
       dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
       dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
+  attest:
+    needs:
+      - bake
+      - build
+    strategy:
+      matrix: ${{ fromJSON(needs.bake.outputs.matrixes).attester }}
+
+    permissions:
+      id-token: write
+      contents: read
+      attestations: write
+      packages: write
+
+    uses: NathanVaughn/reusable-actions/.github/workflows/docker-attest.yml@main
+    with:
+      name: ${{ matrix.name }}
+      attest_id: ${{ matrix.attest_id }}
+    secrets:
+      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+      dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+
+  update-dockerhub:
+    needs: build
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Update DockerHub README
+        uses: christian-korneck/update-container-description-action@v1
+        env:
+          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_PASS: ${{ secrets.DOCKERHUB_PASSWORD }}
+        with:
+          destination_container_repo: ${{ secrets.DOCKERHUB_USERNAME }}/webtrees
+          provider: dockerhub
+          short_description: ${{ github.event.repository.description }}
+
   create-releases:
     needs:
-      - get-versions
-      - build-versions
-    if: ${{ fromJSON(needs.get-versions.outputs.matrixes.builder).include[0] != null }}
+      - bake
+      - build
+    if: ${{ fromJSON(needs.bake.outputs.matrixes).releaser.include[0] != null }}
 
     strategy:
-      matrix: ${{ fromJSON(needs.get-versions.outputs.matrixes.releaser) }}
+      matrix: ${{ fromJSON(needs.bake.outputs.matrixes).releaser }}
 
     permissions:
       contents: write
