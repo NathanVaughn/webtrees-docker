@@ -34,7 +34,7 @@ jobs:
 
       - name: Get Versions
         id: script
-        run: python3 dev/versionchecker.py --forced ${{ inputs.forced }}
+        run: python3 dev/baker.py --forced ${{ inputs.forced }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
