@@ -82,9 +82,9 @@ jobs:
     with:
       name: ${{ matrix.name }}
       attest_id: ${{ matrix.attest_id }}
-    secrets:
-      dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
-      dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
+    # secrets:
+    #   dockerhub_username: ${{ secrets.DOCKERHUB_USERNAME }}
+    #   dockerhub_password: ${{ secrets.DOCKERHUB_PASSWORD }}
 
   update-dockerhub:
     needs: build
