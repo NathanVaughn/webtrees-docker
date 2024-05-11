@@ -6,12 +6,15 @@ ENV WEBTREES_HOME="/var/www/webtrees"
 WORKDIR $WEBTREES_HOME
 
 # install pre-reqs
+# postgresql-client provides pg_isready
+# mariadb-client provides mysqladmin
 RUN apt-get update \
  && apt-get install -y \
     curl \
     libmagickwand-dev \
     libpq-dev \
     libzip-dev \
+    postgresql-client \
     mariadb-client \
     patch \
     python3 \

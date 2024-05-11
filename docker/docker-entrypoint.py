@@ -1,4 +1,5 @@
 import os
+import socket
 import subprocess
 import sys
 import time
@@ -79,15 +80,13 @@ T = TypeVar("T")
 @overload
 def get_environment_variable(
     key: str, default: None = None, alternates: Optional[List[str]] = None
-) -> Optional[str]:
-    ...
+) -> Optional[str]: ...
 
 
 @overload
 def get_environment_variable(
     key: str, default: T = None, alternates: Optional[List[str]] = None
-) -> T:
-    ...
+) -> T: ...
 
 
 def get_environment_variable(
@@ -272,7 +271,7 @@ def set_php_ini_value(key: str, value: str) -> None:
 
 
 def enable_apache_site(
-    enable_sites: List[Literal["webtrees", "webtrees-redir", "webtrees-ssl"]]
+    enable_sites: List[Literal["webtrees", "webtrees-redir", "webtrees-ssl"]],
 ) -> None:
     """
     Enable an Apache site.
@@ -312,12 +311,16 @@ def enable_apache_site(
     for s in all_sites:
         if s not in enable_sites:
             print2(f"Disabling site {s}")
-            subprocess.check_call(["a2dissite", s], stderr=subprocess.DEVNULL)
+            subprocess.check_call(
+                ["a2dissite", s], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            )
 
     # enable the desired sites
     for s in enable_sites:
         print2(f"Enabling site {s}")
-        subprocess.check_call(["a2ensite", s], stderr=subprocess.DEVNULL)
+        subprocess.check_call(
+            ["a2ensite", s], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+        )
 
 
 def perms() -> None:
@@ -413,23 +416,45 @@ def setup_wizard() -> None:
     # set us up to a known HTTP state
     enable_apache_site(["webtrees"])
     # run apache in the background
-    apache_proc = subprocess.Popen(["apache2-foreground"])
+    apache_proc = subprocess.Popen(["apache2-foreground"], stderr=subprocess.DEVNULL)
 
-    # wait until database is ready
-    if ENV.dbtype == DBType.mysql:
-        while (
-            subprocess.run(
-                ["mysqladmin", "ping", f"-h{ENV.dbhost}", "--silent"]
-            ).returncode
-            != 0
-        ):
-            print2("Waiting for MySQL server to be ready")
+    if ENV.dbtype in [DBType.mysql, DBType.pgsql]:
+        # for typing, check_db_variables already does this
+        assert ENV.dbhost is not None
+
+        # try to resolve the host
+        # most common error is wrong hostname
+        try:
+            socket.gethostbyname(ENV.dbhost)
+        except socket.gaierror:
+            print2(f"ERROR: Could not resolve database host '{ENV.dbhost}'")
+            print2(
+                "ERROR: You likely have the DBHOST environment variable set incorrectly."
+            )
+            print2("ERROR: Exiting.")
+
+            # stop apache
+            apache_proc.terminate()
+            # die
+            sys.exit(1)
+
+        # wait until database is ready
+        if ENV.dbtype == DBType.mysql:
+            # https://dev.mysql.com/doc/refman/8.0/en/mysqladmin.html#option_mysqladmin_user
+            # don't miss the capital P
+            cmd = ["mysqladmin", "ping", "-h", ENV.dbhost, "-P", ENV.dbport, "--silent"]
+            name = "MySQL"
+        elif ENV.dbtype == DBType.pgsql:
+            # https://www.postgresql.org/docs/current/app-pg-isready.html
+            cmd = ["pg_isready", "-h", ENV.dbhost, "-p", ENV.dbport, "--quiet"]
+            name = "PostgreSQL"
+
+        while subprocess.run(cmd).returncode != 0:
+            print2(f"Waiting for {name} server {ENV.dbhost}:{ENV.dbport} to be ready")
             time.sleep(1)
 
-    elif ENV.dbtype == DBType.pgsql:
-        print2("Waiting 10 seconds arbitrarily for database server to be ready")
-        time.sleep(10)
     else:
+        # sqlite
         # let Apache start up
         time.sleep(2)
 
@@ -551,7 +576,7 @@ def main() -> None:
     perms()
 
     print2("Starting Apache")
-    subprocess.run(["apache2-foreground"])
+    subprocess.run(["apache2-foreground"], stderr=subprocess.DEVNULL)
 
 
 if __name__ == "__main__":
