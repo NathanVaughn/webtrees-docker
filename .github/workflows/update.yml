@@ -53,6 +53,7 @@ jobs:
 
     uses: NathanVaughn/reusable-actions/.github/workflows/docker-build-push.yml@main
     with:
+      attest_id: ${{ matrix.attest_id }}
       platform: ${{ matrix.platform }}
       tags: ${{ matrix.tags }}
       context: docker
