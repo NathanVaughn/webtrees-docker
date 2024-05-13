@@ -129,26 +129,21 @@ def main(forced_versions: Optional[List[str]] = None) -> None:
     for missing_version_dict in missing_version_dicts:
         ver = missing_version_dict[VERSION_KEY]
 
-        for arch in ARCHITECTURES:
-            attest_id = f"{ver}-{arch}".replace("/", "-")
+        for image in BASE_IMAGES:
+            attester_list.append({"name": image, "attest_id": ver})
 
-            builder_list.append(
-                {
-                    "attest_id": attest_id,
-                    "platform": arch,
-                    "tags": ",".join(all_tags[ver]),
-                    "webtrees_version": ver,
-                    "php_version": next(
-                        value
-                        for key, value in WEBTREES_PHP.items()
-                        if ver.startswith(key)
-                    ),
-                    "patch_version": WEBTREES_PATCH.get(ver, WEBTREES_PATCH["default"]),
-                }
-            )
-
-            for image in BASE_IMAGES:
-                attester_list.append({"name": image, "attest_id": attest_id})
+        builder_list.append(
+            {
+                "attest_id": ver,
+                "platform": ",".join(ARCHITECTURES),
+                "tags": ",".join(all_tags[ver]),
+                "webtrees_version": ver,
+                "php_version": next(
+                    value for key, value in WEBTREES_PHP.items() if ver.startswith(key)
+                ),
+                "patch_version": WEBTREES_PATCH.get(ver, WEBTREES_PATCH["default"]),
+            }
+        )
 
         tag_pretty_list = "\n".join(f"- {tag}" for tag in all_tags[ver])
         releaser_list.append(
