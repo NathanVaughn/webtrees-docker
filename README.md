@@ -79,9 +79,10 @@ You will need a separate container for this.
 - [MariaDB](https://hub.docker.com/_/mariadb)
 - [MySQL](https://hub.docker.com/_/mysql)
 
-PostgreSQL and SQLite are additionally both supported by webtrees and this image, but
-are not recommended. This image does not support Microsoft SQL Server, in order
-to support multiple architectures. See issue:
+PostgreSQL (`pgsql`) and SQLite (`sqlite`) are additionally both supported by
+webtrees and this image, but are not recommended.
+This image does not support Microsoft SQL Server, in order to support multiple
+architectures. See issue:
 [microsoft/msphpsql#441](https://github.com/microsoft/msphpsql/issues/441#issuecomment-310237200)
 
 #### SQLite Values
