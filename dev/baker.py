@@ -15,6 +15,7 @@ BASE_IMAGES = [
     "ghcr.io/nathanvaughn/webtrees",
 ]
 
+# https://webtrees.net/install/
 WEBTREES_PHP = {"1.": "7.4", "2.0": "7.4", "2.1": "8.1", "2.2": "8.4"}
 WEBTREES_PATCH = {"2.1.18": "1", "2.1.19": "2", "default": "2"}
 
