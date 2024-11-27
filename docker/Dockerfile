@@ -24,6 +24,7 @@ RUN apt-get update \
 
 # install php extensions
 # https://github.com/Imagick/imagick/issues/640#issuecomment-2470204174
+# This is only an issue on ARM64
 ADD --chmod=0755 \
   https://github.com/mlocati/docker-php-extension-installer/releases/download/2.6.3/install-php-extensions \
   /usr/local/bin/
