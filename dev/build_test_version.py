@@ -13,10 +13,14 @@ def main(webtrees_version: str) -> None:
     with open(CACHE_FILE, "w") as fp:
         fp.write(f"{webtrees_version}\n")
 
+    # uncomment the next line to build for arm64
     subprocess.run(
         [
             "docker",
+            # "buildx",
             "build",
+            # "--platform",
+            # "linux/arm64",
             "--build-arg",
             f"WEBTREES_VERSION={webtrees_version}",
             "--build-arg",
