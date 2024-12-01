@@ -74,6 +74,8 @@ def get_tags(versions: List[str]) -> Dict[str, List[str]]:
             tag = "latest-1"
         elif version.startswith("2.0"):
             tag = "latest-2.0"
+        elif version.startswith("2.1"):
+            tag = "latest-2.1"
         else:
             tag = "latest"
 
