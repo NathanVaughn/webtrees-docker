@@ -2,6 +2,10 @@ ARG PHP_VERSION=8.1
 
 FROM docker.io/library/php:$PHP_VERSION-apache
 
+# https://hub.docker.com/_/php
+# https://github.com/NathanVaughn/webtrees-docker/issues/160
+RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
+
 ENV WEBTREES_HOME="/var/www/webtrees"
 WORKDIR $WEBTREES_HOME
 
