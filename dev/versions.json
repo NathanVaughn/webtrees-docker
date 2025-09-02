@@ -1,7 +1,7 @@
 [
     {
         "version": "2.2.4",
-        "php": "8.5",
+        "php": "8.4",
         "upgrade_patch": 2,
         "created": "2025-08-04T17:17:14Z",
         "prerelease": false,
@@ -13,7 +13,7 @@
     },
     {
         "version": "2.2.3",
-        "php": "8.5",
+        "php": "8.4",
         "upgrade_patch": 2,
         "created": "2025-07-30T12:09:02Z",
         "prerelease": false,
@@ -21,7 +21,7 @@
     },
     {
         "version": "2.2.2",
-        "php": "8.5",
+        "php": "8.4",
         "upgrade_patch": 2,
         "created": "2025-07-29T10:13:56Z",
         "prerelease": false,
@@ -29,7 +29,7 @@
     },
     {
         "version": "2.2.1",
-        "php": "8.5",
+        "php": "8.4",
         "upgrade_patch": 2,
         "created": "2024-11-30T15:11:53Z",
         "prerelease": false,
@@ -37,7 +37,7 @@
     },
     {
         "version": "2.2.0",
-        "php": "8.5",
+        "php": "8.4",
         "upgrade_patch": 2,
         "created": "2024-11-22T21:53:08Z",
         "prerelease": false,
