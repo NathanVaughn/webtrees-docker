@@ -1,3 +1,7 @@
+# Notes
+
+## Patches
+
 To create a patch, download a release .zip file and extract.
 
 Slice out the contents of `fetchLatestVersion` leaving
@@ -13,3 +17,7 @@ git diff .\UpgradeService.php .\UpgradeServicePatched.php > .\UpgradeService.pat
 in that folder.
 
 Rename and copy into the repo. Update the dict in `versionchecker.py`.
+
+## PHP Versions
+
+<https://webtrees.net/download>
