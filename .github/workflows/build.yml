@@ -1,4 +1,4 @@
-name: Check and Push Updates
+name: Build and Push Images
 
 on:
   workflow_dispatch:
@@ -99,40 +99,40 @@ jobs:
           targets: ${{ matrix.target }}
           set: "*.platform=${{ matrix.platforms }}"
 
-  # update:
-  #   needs: build
-  #   runs-on: ubuntu-latest
+  update:
+    needs: build
+    runs-on: ubuntu-latest
 
-  #   permissions:
-  #     contents: read
+    permissions:
+      contents: read
 
-  #   steps:
-  #     - name: Checkout Code
-  #       uses: actions/checkout@v5
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
 
-  #     - name: Update DockerHub README
-  #       uses: christian-korneck/update-container-description-action@v1
-  #       env:
-  #         DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
-  #         DOCKER_PASS: ${{ secrets.DOCKERHUB_PASSWORD }}
-  #       with:
-  #         destination_container_repo: ${{ secrets.DOCKERHUB_USERNAME }}/webtrees
-  #         provider: dockerhub
-  #         short_description: ${{ github.event.repository.description }}
+      - name: Update DockerHub README
+        uses: christian-korneck/update-container-description-action@v1
+        env:
+          DOCKER_USER: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKER_PASS: ${{ secrets.DOCKERHUB_PASSWORD }}
+        with:
+          destination_container_repo: ${{ secrets.DOCKERHUB_USERNAME }}/webtrees
+          provider: dockerhub
+          short_description: ${{ github.event.repository.description }}
 
-  # release:
-  #   needs:
-  #     - bake
-  #     - build
+  release:
+    needs:
+      - bake
+      - build
 
-  #   strategy:
-  #     matrix: ${{ fromJSON(needs.bake.outputs.release-matrix) }}
+    strategy:
+      matrix: ${{ fromJSON(needs.bake.outputs.release-matrix) }}
 
-  #   permissions:
-  #     contents: write
+    permissions:
+      contents: write
 
-  #   uses: NathanVaughn/reusable-actions/.github/workflows/create-release.yml@main
-  #   with:
-  #     tag: ${{ matrix.tag }}
-  #     body: ${{ matrix.body }}
-  #     prerelease: ${{ matrix.prerelease }}
+    uses: NathanVaughn/reusable-actions/.github/workflows/create-release.yml@main
+    with:
+      tag: ${{ matrix.tag }}
+      body: ${{ matrix.body }}
+      prerelease: ${{ matrix.prerelease }}
