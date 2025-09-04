@@ -1,54 +1,12 @@
 import argparse
-import functools
 import json
 import os
-import urllib.request
 
-THIS_DIR = os.path.dirname(os.path.abspath(__file__))
+from common import BASE_IMAGES, IS_GA, THIS_DIR, versions_dict
+
 ROOT_DIR = os.path.dirname(THIS_DIR)
-IS_GA = os.getenv("GITHUB_ACTIONS") == "true"
-
 PLATFORMS = ["linux/amd64"]
-BASE_IMAGES = [
-    "index.docker.io/nathanvaughn/webtrees",
-    "ghcr.io/nathanvaughn/webtrees",
-]
-
-
-@functools.cache
-def versions_dict() -> dict:
-    with open(os.path.join(THIS_DIR, "versions.json")) as f:
-        data = json.load(f)
-
-    return {d["version"]: d for d in data}
-
-
-def find_new_versions() -> list[str]:
-    """
-    Return a list of new versions found in the upstream repo.
-    """
-    # build url
-    url = "https://api.github.com/repos/fisharebest/webtrees/releases?per_page=20"
-    request = urllib.request.Request(url)
-
-    if token := os.getenv("GITHUB_TOKEN"):
-        request.add_header("Authorization", f"Bearer {token}")
-
-    # download data
-    data = urllib.request.urlopen(request)
-    # parse json
-    json_data = json.loads(data.read().decode())
-
-    # skip releases with no assets
-    upstream_versions = []
-    for release in json_data:
-        if release["assets"]:
-            upstream_versions.append(release["tag_name"])
-
-    # filter out versions we already know about
-    known_versions = versions_dict().keys()
-    new_versions = [v for v in upstream_versions if v not in known_versions]
-    return new_versions
+ARM_PLATFORMS = ["linux/arm/v7", "linux/arm64"]
 
 
 def bake_file(versions: list[str], testing: bool) -> dict:
@@ -68,17 +26,20 @@ def bake_file(versions: list[str], testing: bool) -> dict:
         else:
             # build a list of tags. Use every base image with the version,
             # plus any extra tags (e.g., latest)
-            tags = [f"{bi}:{version}" for bi in BASE_IMAGES] + [
-                f"{bi}:{tag}"
-                for bi in BASE_IMAGES
-                for tag in version_info["extra_tags"]
-            ]
+            tags = sorted(
+                [f"{bi}:{version}" for bi in BASE_IMAGES]
+                + [
+                    f"{bi}:{tag}"
+                    for bi in BASE_IMAGES
+                    for tag in version_info["extra_tags"]
+                ]
+            )
         matrix_data.append(
             {
                 "version": version,
                 "php": version_info["php"],
                 "upgrade_patch": version_info["upgrade_patch"],
-                "tags": sorted(tags),
+                "tags": tags,
             }
         )
 
@@ -105,6 +66,7 @@ def bake_file(versions: list[str], testing: bool) -> dict:
             {"type": "provenance", "mode": "max"},
             {"type": "sbom"},
         ]
+        # webtrees_target["output"] = [{"type": "registry"}]
     else:
         # items specific to local builds
         webtrees_target["cache-from"] = [
@@ -126,14 +88,11 @@ def bake_file(versions: list[str], testing: bool) -> dict:
     }
 
 
-def main(save_to_file: bool, testing: bool, forced_versions: list[str]) -> None:
-    new_versions = find_new_versions()
-    versions = sorted(set(new_versions) | set(forced_versions), reverse=True)
-
+def main(save_to_file: bool, testing: bool, versions: list[str]) -> None:
     result = bake_file(versions=versions, testing=testing)
 
     if save_to_file:
-        with open("docker-bake.json", "w") as fp:
+        with open(os.path.join(ROOT_DIR, "docker-bake.json"), "w") as fp:
             json.dump(result, fp, indent=4)
     else:
         print(json.dumps(result, indent=4))
@@ -154,6 +113,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.arm:
-        PLATFORMS.extend(["linux/arm/v7", "linux/arm64"])
+        PLATFORMS.extend(ARM_PLATFORMS)
 
-    main(save_to_file=args.file, testing=args.test, forced_versions=args.versions)
+    main(save_to_file=args.file, testing=args.test, versions=args.versions)

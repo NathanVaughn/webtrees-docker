@@ -1,0 +1,42 @@
+name: Check For Updates
+
+on:
+  schedule:
+    - cron: "0 12 * * *"
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: read
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v5
+
+      - name: Get Versions
+        id: get-versions
+        run: echo "versions=$(python3 dev/checker.py)" >> $GITHUB_OUTPUT
+        env:
+          GITHUB_TOKEN: ${{ github.token }}
+
+      - name: Create issues
+        run: |
+          # Get the JSON string from the previous step's output
+          VERSIONS_JSON='${{ steps.get-versions.outputs.versions }}'
+
+          # Check if the JSON is valid and not empty
+          if [ -z "$VERSIONS_JSON" ] || [ "$VERSIONS_JSON" = "null" ]; then
+            echo "No versions to process."
+            exit 0
+          fi
+
+          # Use jq to parse the JSON and loop through each item
+          jq -r '.[]' <<< "$VERSIONS_JSON" | while read -r version; do
+            echo "Creating issue for version: $version"
+            gh issue create --repo "$GITHUB_REPOSITORY" --title "Webtrees Version $version" --body "Please update `dev/versions.json` to include version $version. Run the Build action when ready to build and push the new image."
+          done
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
