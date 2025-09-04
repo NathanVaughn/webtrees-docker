@@ -21,3 +21,12 @@ Rename and copy into the repo. Update the dict in `versionchecker.py`.
 ## PHP Versions
 
 <https://webtrees.net/download>
+
+## Building Image
+
+Example:
+
+```powershell
+uv run .\dev\baker.py --file --version 2.2.4
+docker buildx bake webtrees
+```
