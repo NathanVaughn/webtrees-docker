@@ -1,184 +1,118 @@
 import argparse
 import json
 import os
-import sys
-import urllib.request
-from typing import Dict, List, Optional
 
-from retry import retry
+from common import BASE_IMAGES, IS_GA, THIS_DIR, versions_dict
 
-WEBTREES_REPO = "fisharebest/webtrees"
-MY_REPO = os.getenv("GITHUB_REPOSITORY", default="nathanvaughn/webtrees-docker")
-ARCHITECTURES = ["linux/amd64", "linux/arm/v7", "linux/arm64"]
-BASE_IMAGES = [
-    "index.docker.io/nathanvaughn/webtrees",
-    "ghcr.io/nathanvaughn/webtrees",
-]
-
-# https://webtrees.net/install/
-# PHP 8.4 is still broken with imagick.
-# See https://github.com/Imagick/imagick/issues/698
-WEBTREES_PHP = {"1.": "7.4", "2.0": "7.4", "2.1": "8.1", "2.2": "8.3"}
-WEBTREES_PATCH = {"2.1.18": "1", "2.1.19": "2", "default": "2"}
-
-# used to use 'name' of release, but this has started being blank
-VERSION_KEY = "tag_name"
+ROOT_DIR = os.path.dirname(THIS_DIR)
+PLATFORMS = ["linux/amd64"]
+ARM_PLATFORMS = ["linux/arm/v7", "linux/arm64"]
 
 
-@retry(tries=5, delay=2, backoff=3)
-def get_latest_versions(
-    repo: str, number: int = 5, check_assets: bool = False
-) -> List[dict]:
+def bake_file(versions: list[str], testing: bool) -> dict:
     """
-    Get latest versions from a repository releases
+    Generate the contents of a docker-bake.json file.
     """
+    # build the matrix data
+    matrix_data = []
+    for version in versions:
+        if version not in versions_dict():
+            raise ValueError(f"Version {version} not found in versions.json")
 
-    # build url
-    url = f"https://api.github.com/repos/{repo}/releases"
-    request = urllib.request.Request(url)
+        version_info = versions_dict()[version]
 
-    if os.getenv("GITHUB_TOKEN"):
-        request.add_header("Authorization", f'Bearer {os.environ["GITHUB_TOKEN"]}')
-
-    # download data
-    data = urllib.request.urlopen(request)
-    # parse json
-    json_data = json.loads(data.read().decode())
-    # only get the latest items
-    latest_releases = json_data[:number]
-
-    # skip releases with no assets
-    if check_assets:
-        for release in latest_releases:
-            if not release["assets"]:
-                latest_releases.remove(release)
-
-    return latest_releases
-
-
-def get_tags(versions: List[str]) -> Dict[str, List[str]]:
-    """
-    Create a list of tags for a given version number
-    """
-    # dict of list of tags to return
-    versions_tags = {}
-
-    # all tags seen, so we don't duplicate
-    tags_seen = set()
-
-    # sort descending to work from newest to oldest
-    for version in sorted(versions, reverse=True):
-        tag_list = [version]
-
-        if version.startswith("1."):
-            tag = "latest-1"
-        elif version.startswith("2.0"):
-            tag = "latest-2.0"
-        elif version.startswith("2.1"):
-            tag = "latest-2.1"
+        if testing:
+            tags = [f"webtrees:{version}-test"]
         else:
-            tag = "latest"
-
-        if "alpha" in version:
-            tag += "-alpha"
-        elif "beta" in version:
-            tag += "-beta"
-
-        # check against our list of all tags seen to make sure we don't have duplicates
-        if tag not in tags_seen:
-            tag_list.append(tag)
-            tags_seen.add(tag)
-
-        versions_tags[version] = [
-            f"{base_image}:{t}" for t in tag_list for base_image in BASE_IMAGES
-        ]
-
-    return versions_tags
-
-
-def main(forced_versions: Optional[List[str]] = None) -> None:
-    # get the latest versions of each repo
-    wt_version_dicts = get_latest_versions(WEBTREES_REPO, 10, check_assets=True)
-    my_version_dicts = get_latest_versions(MY_REPO, 10)
-
-    missing_version_dicts = []
-
-    # go through each version of webtrees
-    for wt_version_dict in wt_version_dicts:
-        wt_version = wt_version_dict[VERSION_KEY]
-
-        # dropped support for legacy images
-        if wt_version.startswith("1."):
-            continue
-
-        # check if version is a forced one
-        if wt_version in forced_versions:
-            # if so, add to list of missing versions
-            print(f"Version {wt_version} forcefully added.", file=sys.stderr)
-            missing_version_dicts.append(wt_version_dict)
-
-        # check if version is not in my repo
-        elif all(v[VERSION_KEY] != wt_version for v in my_version_dicts):
-            # if not, add to list of missing versions
-            print(f"Version {wt_version} missing.", file=sys.stderr)
-            missing_version_dicts.append(wt_version_dict)
-
-    # build authoritative list of all tags we're going to produce
-    all_tags = get_tags([v[VERSION_KEY] for v in missing_version_dicts])
-
-    # build output json
-    builder_list = []
-    releaser_list = []
-    attester_list = []
-
-    for missing_version_dict in missing_version_dicts:
-        ver = missing_version_dict[VERSION_KEY]
-
-        for image in BASE_IMAGES:
-            attester_list.append({"name": image, "attest_id": ver})
-
-        builder_list.append(
+            # build a list of tags. Use every base image with the version,
+            # plus any extra tags (e.g., latest)
+            tags = sorted(
+                [f"{bi}:{version}" for bi in BASE_IMAGES]
+                + [
+                    f"{bi}:{tag}"
+                    for bi in BASE_IMAGES
+                    for tag in version_info["extra_tags"]
+                ]
+            )
+        matrix_data.append(
             {
-                "attest_id": ver,
-                "platform": ",".join(ARCHITECTURES),
-                "tags": ",".join(all_tags[ver]),
-                "webtrees_version": ver,
-                "php_version": next(
-                    value for key, value in WEBTREES_PHP.items() if ver.startswith(key)
-                ),
-                "patch_version": WEBTREES_PATCH.get(ver, WEBTREES_PATCH["default"]),
+                "version": version,
+                "php": version_info["php"],
+                "upgrade_patch": version_info["upgrade_patch"],
+                "tags": tags,
             }
         )
 
-        tag_pretty_list = "\n".join(f"- {tag}" for tag in all_tags[ver])
-        releaser_list.append(
-            {
-                "tag": ver,
-                "prerelease": missing_version_dict["prerelease"],
-                "body": f'Automated release for webtrees version {ver}: {missing_version_dict["html_url"]}\nTags pushed:\n{tag_pretty_list}',
-            }
-        )
-
-    # structure for github actions
-    output_data = {
-        "builder": {"include": builder_list},
-        "releaser": {"include": releaser_list},
-        "attester": {"include": attester_list},
+    # https://docs.docker.com/build/bake/reference/
+    webtrees_target = {
+        "name": 'webtrees-${replace(tgt.version, ".", "-")}',
+        "context": "docker/",
+        "dockerfile": "Dockerfile",
+        "platforms": PLATFORMS,
+        "matrix": {"tgt": matrix_data},
+        "args": {
+            "WEBTREES_VERSION": "${tgt.version}",
+            "PHP_VERSION": "${tgt.php}",
+            "UPGRADE_PATCH_VERSION": "${tgt.upgrade_patch}",
+        },
+        "tags": "${tgt.tags}",
     }
 
-    # save output
-    print(json.dumps(output_data, indent=4))
+    if IS_GA:
+        # items specific to GitHub Actions
+        webtrees_target["cache-from"] = [{"type": "gha"}]
+        webtrees_target["cache-to"] = [{"type": "gha"}]
+        webtrees_target["attest"] = [
+            {"type": "provenance", "mode": "max"},
+            {"type": "sbom"},
+        ]
+        # webtrees_target["output"] = [{"type": "registry"}]
+    else:
+        # items specific to local builds
+        webtrees_target["cache-from"] = [
+            {
+                "type": "local",
+                "src": os.path.join(ROOT_DIR, ".buildx-cache"),
+            }
+        ]
+        webtrees_target["cache-to"] = [
+            {
+                "type": "local",
+                "dest": os.path.join(ROOT_DIR, ".buildx-cache"),
+            }
+        ]
 
-    if github_output := os.getenv("GITHUB_OUTPUT"):
-        with open(github_output, "w") as fp:
-            fp.write(f"matrixes={json.dumps(output_data)}")
+    return {
+        "$schema": "https://www.schemastore.org/docker-bake.json",
+        "target": {"webtrees": webtrees_target},
+    }
+
+
+def main(save_to_file: bool, testing: bool, versions: list[str]) -> None:
+    result = bake_file(versions=versions, testing=testing)
+
+    if save_to_file:
+        with open(os.path.join(ROOT_DIR, "docker-bake.json"), "w") as fp:
+            json.dump(result, fp, indent=4)
+    else:
+        print(json.dumps(result, indent=4))
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
+    parser.add_argument("--arm", action="store_true", help="Include ARM architecture")
+    parser.add_argument("--file", action="store_true", help="Output to JSON")
+    parser.add_argument("--test", action="store_true", help="Only save the tag 'test")
     parser.add_argument(
-        "--forced", type=str, nargs="*", default=[]
-    )  # forcefully add specific versions
+        "--versions",
+        type=str,
+        nargs="*",
+        default=[],
+        help="Specific versions to include",
+    )
     args = parser.parse_args()
 
-    main(args.forced)
+    if args.arm:
+        PLATFORMS.extend(ARM_PLATFORMS)
+
+    main(save_to_file=args.file, testing=args.test, versions=args.versions)

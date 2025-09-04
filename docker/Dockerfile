@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.3
+ARG PHP_VERSION=8.4
 
 FROM docker.io/library/php:$PHP_VERSION-apache
 
@@ -45,8 +45,8 @@ RUN curl -s -L https://github.com/fisharebest/webtrees/releases/download/${WEBTR
 
 # Disable version update prompt. Webtrees should not be upgrading itself,
 # users should be using tagged container versions
-ARG PATCH_VERSION
-COPY patches/UpgradeService${PATCH_VERSION}.patch /UpgradeService.patch
+ARG UPGRADE_PATCH_VERSION
+COPY patches/UpgradeService${UPGRADE_PATCH_VERSION}.patch /UpgradeService.patch
 RUN patch app/Services/UpgradeService.php /UpgradeService.patch \
  && rm /UpgradeService.patch \
 # Delete file that caused email issues
