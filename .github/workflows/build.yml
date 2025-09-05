@@ -95,9 +95,13 @@ jobs:
 
       - name: Build and Push
         uses: docker/bake-action@v6
+        id: builder
         with:
           targets: ${{ matrix.target }}
           set: "*.platform=${{ matrix.platforms }}"
+
+      - name: Print Outputs
+        run: echo ${{ steps.builder.outputs.metadata }}"
 
   update:
     needs: build
