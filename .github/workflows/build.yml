@@ -32,7 +32,7 @@ jobs:
           fields: platforms
 
       - name: Upload Bake File
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           path: docker-bake.json
           name: bake-file
@@ -64,7 +64,7 @@ jobs:
         uses: actions/checkout@v5
 
       - name: Download Bake File
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: bake-file
 
