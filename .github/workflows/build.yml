@@ -17,7 +17,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Create Bake File
         run: python3 dev/baker.py --arm --file --versions ${{ inputs.versions }}
@@ -61,7 +61,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Download Bake File
         uses: actions/download-artifact@v6
@@ -112,7 +112,7 @@ jobs:
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Update DockerHub README
         uses: christian-korneck/update-container-description-action@v1
