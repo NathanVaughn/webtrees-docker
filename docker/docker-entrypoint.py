@@ -356,6 +356,11 @@ def php_ini() -> None:
     set_php_ini_value("post_max_size", ENV.phppostmaxsize)
     set_php_ini_value("upload_max_filesize", ENV.phpuploadmaxfilesize)
 
+    # https://webtrees.net/admin/performance/
+    set_php_ini_value("opcache.enable", "1")
+    set_php_ini_value("opcache.revalidate_freq", "60") # re check changed files every 60 seconds
+    set_php_ini_value("opcache.revalidate_path", "0")
+
 
 def check_db_variables() -> bool:
     """
