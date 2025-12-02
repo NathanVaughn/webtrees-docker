@@ -30,7 +30,7 @@ RUN apt-get update \
 RUN pecl install imagick \
  && docker-php-ext-enable imagick \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
- && docker-php-ext-install -j"$(nproc)" pdo pdo_mysql pdo_pgsql zip intl gd exif
+ && docker-php-ext-install -j"$(nproc)" pdo pdo_mysql pdo_pgsql zip intl gd exif opcache
 
 # remove old apt stuff
 RUN apt-get purge gcc g++ make -y \
