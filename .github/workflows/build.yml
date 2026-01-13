@@ -100,7 +100,7 @@ jobs:
           set: "*.platform=${{ matrix.platforms }}"
 
       - name: Print Outputs
-        run: echo ${{ steps.builder.outputs.metadata }}"
+        run: echo "${{ steps.builder.outputs.metadata }}"
 
   update:
     needs: build
