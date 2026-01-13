@@ -97,6 +97,7 @@ jobs:
         uses: docker/bake-action@v6
         id: builder
         with:
+          source: .
           targets: ${{ matrix.target }}
           set: "*.platform=${{ matrix.platforms }}"
 
