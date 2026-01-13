@@ -1,15 +1,23 @@
 [
     {
-        "version": "2.2.4",
+        "version": "2.2.5",
         "php": "8.4",
         "upgrade_patch": 2,
-        "created": "2025-08-04T17:17:14Z",
+        "created": "2026-01-13T07:16:00Z",
         "prerelease": false,
         "extra_tags": [
             "2.2",
             "2",
             "latest"
         ]
+    },
+    {
+        "version": "2.2.4",
+        "php": "8.4",
+        "upgrade_patch": 2,
+        "created": "2025-08-04T17:17:14Z",
+        "prerelease": false,
+        "extra_tags": []
     },
     {
         "version": "2.2.3",
@@ -44,14 +52,22 @@
         "extra_tags": []
     },
     {
+        "version": "2.1.26",
+        "php": "8.2",
+        "upgrade_patch": 2,
+        "created": "2026-01-13T06:50:00Z",
+        "prerelease": false,
+        "extra_tags": [
+            "2.1"
+        ]
+    },
+    {
         "version": "2.1.25",
         "php": "8.2",
         "upgrade_patch": 2,
         "created": "2025-08-04T17:42:09Z",
         "prerelease": false,
-        "extra_tags": [
-            "2.1"
-        ]
+        "extra_tags": []
     },
     {
         "version": "2.1.24",
