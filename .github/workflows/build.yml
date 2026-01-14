@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Create Bake File
-        run: python3 dev/baker.py --arm --file --versions ${{ inputs.versions }}
+        run: python dev/baker.py --arm --file --versions ${{ inputs.versions }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -39,7 +39,7 @@ jobs:
 
       - name: Create Release Matrix
         id: releases
-        run: python3 dev/releases.py --versions ${{ inputs.versions }}
+        run: python dev/releases.py --versions ${{ inputs.versions }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -91,7 +91,7 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Build and Push
+      - name: Build
         uses: docker/bake-action@v6
         id: builder
         with:
@@ -99,8 +99,11 @@ jobs:
           targets: ${{ matrix.target }}
           set: "*.platform=${{ matrix.platforms }}"
 
-      - name: Print Outputs
-        run: echo "${{ steps.builder.outputs.metadata }}"
+      - name: Save Digest
+        run: echo "${{ steps.builder.outputs.metadata }}" > metadata.json
+
+      - name: Upload Digest
+        run: python dev/imagetools.py metadata.json
 
   update:
     needs: build

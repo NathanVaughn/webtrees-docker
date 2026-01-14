@@ -66,7 +66,8 @@ def bake_file(versions: list[str], testing: bool) -> dict:
             {"type": "provenance", "mode": "max"},
             {"type": "sbom"},
         ]
-        webtrees_target["output"] = [{"type": "registry"}]
+        # don't push to registry by name, only push by digest
+        webtrees_target["output"] = [{"type": "image,push-by-digest=true,push=true,name-canonical=true"}]
     else:
         # items specific to local builds
         webtrees_target["cache-from"] = [
