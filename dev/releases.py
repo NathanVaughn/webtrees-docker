@@ -24,7 +24,7 @@ def main(versions: list[str]) -> None:
             {
                 "tag": version,
                 "prerelease": version_info["prerelease"],
-                "body": f"Release for webtrees version {version}: https://github.com/fisharebest/webtrees/releases/tag/{version}\nTags pushed:\n{'\n'.join(f'- {tag}' for tag in tags)}",
+                "body": f"Release for webtrees version {version}: https://github.com/fisharebest/webtrees/releases/tag/{version}\n\nTags pushed:\n{'\n'.join(f'- {tag}' for tag in tags)}",
             }
         )
 
