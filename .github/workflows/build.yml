@@ -103,7 +103,7 @@ jobs:
             *.platform=${{ matrix.platforms }}
 
       - name: Save Build Metadata
-        run: echo "${{ steps.builder.outputs.metadata }}" > build-metadata.json
+        run: echo '${{ steps.builder.outputs.metadata }}' > build-metadata.json
 
       - name: Upload Build Metadata
         # For debugging purposes
