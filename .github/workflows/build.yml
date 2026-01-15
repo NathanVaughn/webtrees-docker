@@ -102,8 +102,18 @@ jobs:
             *.tags=${{ fromJSON(needs.bake.outputs.metadata).base_images[1] }}
             *.platform=${{ matrix.platforms }}
 
+      - name: Save Build Metadata
+        run: echo "${{ steps.builder.outputs.metadata }}" > build-metadata.json
+
+      - name: Upload Build Metadata
+        # For debugging purposes
+        uses: actions/upload-artifact@v6
+        with:
+          path: build-metadata.json
+          name: build-metadata-${{ matrix.platforms }}
+
       - name: Upload Digest
-        run: python dev/imagetools.py ${{ fromJSON(needs.bake.outputs.metadata).tags }} $(echo "${{ steps.builder.outputs.metadata }}" | jq -r '.webtrees.[ "containerimage.digest" ]')
+        run: python dev/imagetools.py ${{ fromJSON(needs.bake.outputs.metadata).tags }} $(cat build-metadata.json | jq -r '.webtrees.[ "containerimage.digest" ]')
 
   update:
     needs: build
