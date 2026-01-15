@@ -17,7 +17,7 @@ def main(version: str) -> None:
         "release_tag": version,
         "prerelease": version_info["prerelease"],
         "release_body": f"Release for webtrees version {version}: https://github.com/fisharebest/webtrees/releases/tag/{version}\n\nTags pushed:\n{'\n'.join(f'- {tag}' for tag in tags)}",
-        "base_images": ",".join(BASE_IMAGES),
+        "base_images": BASE_IMAGES,
         "tags": ",".join(tags),
     }
 

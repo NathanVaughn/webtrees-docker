@@ -98,7 +98,8 @@ jobs:
           source: .
           targets: ${{ matrix.target }}
           set: |
-            *.tags=${{ fromJSON(needs.bake.outputs.metadata).base_images }}
+            *.tags=${{ fromJSON(needs.bake.outputs.metadata).base_images[0] }}
+            *.tags=${{ fromJSON(needs.bake.outputs.metadata).base_images[1] }}
             *.platform=${{ matrix.platforms }}
 
       - name: Upload Digest
