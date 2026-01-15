@@ -34,7 +34,7 @@ def bake_file(version: str, testing: bool) -> dict:
 
     # https://docs.docker.com/build/bake/reference/
     webtrees_target = {
-        "name": "webtrees",
+        # "name": "webtrees", # only for matrix builds
         "context": "docker/",
         "dockerfile": "Dockerfile",
         "platforms": PLATFORMS,
