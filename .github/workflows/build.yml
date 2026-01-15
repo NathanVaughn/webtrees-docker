@@ -3,10 +3,10 @@ name: Build and Push Images
 on:
   workflow_dispatch:
     inputs:
-      versions:
+      version:
         type: string
         required: true
-        description: "Space-separated version numbers to build"
+        description: "Enter a SINGLE version number to build"
 
 jobs:
   bake:
@@ -20,7 +20,7 @@ jobs:
         uses: actions/checkout@v6
 
       - name: Create Bake File
-        run: python dev/baker.py --arm --file --versions ${{ inputs.versions }}
+        run: python dev/baker.py --arm --file --version ${{ inputs.version }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
@@ -37,15 +37,15 @@ jobs:
           path: docker-bake.json
           name: bake-file
 
-      - name: Create Release Matrix
-        id: releases
-        run: python dev/releases.py --versions ${{ inputs.versions }}
+      - name: Output Metadata
+        id: metadata
+        run: python dev/metadata.py --version ${{ inputs.version }}
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
     outputs:
       build-matrix: ${{ steps.generate.outputs.matrix }}
-      release-matrix: ${{ steps.releases.outputs.matrix }}
+      metadata: ${{ steps.metadata.outputs.metadata }}
 
   build:
     needs: bake
@@ -97,13 +97,12 @@ jobs:
         with:
           source: .
           targets: ${{ matrix.target }}
-          set: "*.platform=${{ matrix.platforms }}"
-
-      - name: Save Digest
-        run: echo "${{ steps.builder.outputs.metadata }}" > metadata.json
+          set: |
+            *.tags=${{ fromJSON(needs.bake.outputs.metadata).base_images }}
+            *.platform=${{ matrix.platforms }}
 
       - name: Upload Digest
-        run: python dev/imagetools.py metadata.json
+        run: python dev/imagetools.py ${{ fromJSON(needs.bake.outputs.metadata).tags }} $(echo "${{ steps.builder.outputs.metadata }}" | jq -r '.webtrees.[ "containerimage.digest" ]')
 
   update:
     needs: build
@@ -131,14 +130,11 @@ jobs:
       - bake
       - build
 
-    strategy:
-      matrix: ${{ fromJSON(needs.bake.outputs.release-matrix) }}
-
     permissions:
       contents: write
 
     uses: NathanVaughn/reusable-actions/.github/workflows/create-release.yml@main
     with:
-      tag: ${{ matrix.tag }}
-      body: ${{ matrix.body }}
-      prerelease: ${{ matrix.prerelease }}
+      tag: ${{ fromJSON(needs.bake.outputs.metadata).release_tag }}
+      body: ${{ fromJSON(needs.bake.outputs.metadata).release_body }}
+      prerelease: ${{ fromJSON(needs.bake.outputs.metadata).prerelease }}

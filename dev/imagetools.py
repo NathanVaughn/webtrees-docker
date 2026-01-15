@@ -1,25 +1,17 @@
 import argparse
-import json
 import subprocess
 
 from common import BASE_IMAGES, IS_GA
 
 
-def main(file: str) -> None:
-    with open(file) as f:
-        data = json.load(f)
-
-    target = list(data.keys())[0]
-    digest = data[target]["containerimage.digest"]
-    tags = data[target]["image.name"].split(",")
-
+def main(tags: list[str], hash: str) -> None:
     for base_image in BASE_IMAGES:
         cmd = ["docker", "buildx", "imagetools", "create", "--append"]
 
         for tag in [tag for tag in tags if tag.startswith(base_image)]:
             cmd.extend(["-t", tag])
 
-        cmd.append(f"{base_image}@{digest}")
+        cmd.append(f"{base_image}@{hash}")
 
         print(" ".join(cmd))
 
@@ -29,7 +21,8 @@ def main(file: str) -> None:
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("file", type=str)
+    parser.add_argument("tags", type=str)
+    parser.add_argument("hash", type=str)
     args = parser.parse_args()
 
-    main(file=args.file)
+    main(tags=args.tags.split(","), hash=args.hash)
