@@ -24,6 +24,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ github.token }}
 
+      - name: Upload Bake File
+        uses: actions/upload-artifact@v6
+        with:
+          path: docker-bake.json
+          name: bake-file
+
+      # Splits the bake file into a build matrix based on the platforms
       - name: Generate Build Matrix
         id: generate
         uses: docker/bake-action/subaction/matrix@v6
@@ -31,12 +38,7 @@ jobs:
           target: webtrees
           fields: platforms
 
-      - name: Upload Bake File
-        uses: actions/upload-artifact@v6
-        with:
-          path: docker-bake.json
-          name: bake-file
-
+      # Generate some extra metadata for use in later steps
       - name: Output Metadata
         id: metadata
         run: python dev/metadata.py --version ${{ inputs.version }}
@@ -68,6 +70,7 @@ jobs:
         with:
           name: bake-file
 
+      # Pretty sure no longer necessary with ARM runners, but left in case
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
         with:
@@ -97,6 +100,10 @@ jobs:
         with:
           source: .
           targets: ${{ matrix.target }}
+          # Since we're not pushing directly to the registry here, the tags
+          # need to just be the base image names with no ":latest" or similar tag.
+          # If the image is pushed in this step, the last tag built would overwrite
+          # any other tags and only get one platform in the registry manifest.
           set: |
             *.tags=${{ fromJSON(needs.bake.outputs.metadata).base_images[0] }}
             *.tags=${{ fromJSON(needs.bake.outputs.metadata).base_images[1] }}
@@ -105,13 +112,15 @@ jobs:
       - name: Save Build Metadata
         run: echo '${{ steps.builder.outputs.metadata }}' > build-metadata.json
 
+      # For debugging purposes
       - name: Upload Build Metadata
-        # For debugging purposes
         uses: actions/upload-artifact@v6
         with:
           path: build-metadata.json
           name: build-metadata-${{ hashFiles('build-metadata.json') }}
 
+      # Update the registry with the tags to apply to the specific digest.
+      # With the --append flag, this will update instead of overwrite.
       - name: Upload Digest
         run: python dev/imagetools.py ${{ fromJSON(needs.bake.outputs.metadata).tags }} $(cat build-metadata.json | jq -r '.webtrees.[ "containerimage.digest" ]')
 
