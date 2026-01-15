@@ -6,6 +6,9 @@ from common import BASE_IMAGES, IS_GA, versions_dict
 
 
 def main(version: str) -> None:
+    """
+    Generate metadata for the given version to be used in CI steps.
+    """
     version_info = versions_dict()[version]
 
     tags = sorted(

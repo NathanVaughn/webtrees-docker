@@ -5,6 +5,9 @@ from common import BASE_IMAGES, IS_GA
 
 
 def main(tags: list[str], hash: str) -> None:
+    """
+    Update the image index with the given tags pointing to the given hash.
+    """
     for base_image in BASE_IMAGES:
         cmd = ["docker", "buildx", "imagetools", "create", "--append"]
 
