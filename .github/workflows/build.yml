@@ -110,7 +110,7 @@ jobs:
         uses: actions/upload-artifact@v6
         with:
           path: build-metadata.json
-          name: build-metadata-${{ matrix.platforms }}
+          name: build-metadata-${{ hashFiles('build-metadata.json') }}
 
       - name: Upload Digest
         run: python dev/imagetools.py ${{ fromJSON(needs.bake.outputs.metadata).tags }} $(cat build-metadata.json | jq -r '.webtrees.[ "containerimage.digest" ]')
