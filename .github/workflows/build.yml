@@ -40,8 +40,6 @@ jobs:
       - name: Output Metadata
         id: metadata
         run: python dev/metadata.py --version ${{ inputs.version }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
 
     outputs:
       build-matrix: ${{ steps.generate.outputs.matrix }}
