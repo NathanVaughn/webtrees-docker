@@ -21,8 +21,6 @@ jobs:
 
       - name: Create Bake File
         run: python dev/baker.py --arm --file --version ${{ inputs.version }}
-        env:
-          GITHUB_TOKEN: ${{ github.token }}
 
       - name: Upload Bake File
         uses: actions/upload-artifact@v6
