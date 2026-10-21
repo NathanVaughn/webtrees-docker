@@ -11,6 +11,19 @@ This is a multi-architecture, up-to-date, Docker image for
 This can be put behind a reverse proxy such as CloudFlare or Traefik, or
 run standalone.
 
+**🚨 WARNING 🚨**
+
+Users should update immediately update to one of the following tags pushed on or after 2026-10-21 or re-pull the image:
+
+- `2`
+- `2.1`
+- `2.1.27`
+- `2.2`
+- `2.2.6`
+- `latest`
+
+These tags have been updated to address PHP vulnerabilities known as "[PHP2Shell](https://www.php2shell.com/)".
+
 ## Usage
 
 ### Quickstart
@@ -24,10 +37,11 @@ There are many environment variables available to help automatically configure
 the container. For any environment variable you do not define,
 the default value will be used.
 
-> **🚨 WARNING 🚨**
-> These environment variables will be visible in the webtrees control panel
-> under "Server information". Either lock down the control panel
-> to administrators, or use the webtrees setup wizard.
+**🚨 WARNING 🚨**
+
+These environment variables will be visible in the webtrees control panel
+under "Server information". Either lock down the control panel
+to administrators, or use the webtrees setup wizard.
 
 | Environment Variable                                                       | Required | Default               | Notes                                                                                                                                                                                                             |
 | -------------------------------------------------------------------------- | -------- | --------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
