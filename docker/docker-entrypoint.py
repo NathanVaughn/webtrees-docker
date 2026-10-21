@@ -1,5 +1,6 @@
 import filecmp
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -29,6 +30,7 @@ class EnvVars:
     prettyurls: bool
     https: bool
     httpsredirect: bool
+    httpsport: str
     sslcertfile: str
     sslcertkeyfile: str
     lang: str
@@ -44,6 +46,10 @@ class EnvVars:
     wtname: Optional[str]
     wtpass: Optional[str]
     wtemail: Optional[str]
+    # reverse proxy support, comma-separated lists
+    # https://webtrees.net/admin/proxy/
+    trustedproxies: Optional[str]
+    trustedheaders: Optional[str]
     # https://github.com/fisharebest/webtrees/blob/f9a3af650116d75f1a87f454cabff5e9047e43f3/app/Http/Middleware/UseDatabase.php#L71-L82
     dbkey: Optional[str]
     dbcert: Optional[str]
@@ -54,9 +60,6 @@ class EnvVars:
     phpmaxexecutiontime: str
     phppostmaxsize: str
     phpuploadmaxfilesize: str
-    # user/group ID
-    puid: str
-    pgid: str
 
 
 def truish(value: Optional[str]) -> bool:
@@ -140,6 +143,8 @@ ENV = EnvVars(
     httpsredirect=truish(
         get_environment_variable("HTTPS_REDIRECT", alternates=["SSL_REDIRECT"])
     ),
+    # external HTTPS port the redirect should point to
+    httpsport=get_environment_variable("HTTPS_PORT", "443"),
     sslcertfile=get_environment_variable("SSL_CERT_FILE", "/certs/webtrees.crt"),
     sslcertkeyfile=get_environment_variable("SSL_CERT_KEY_FILE", "/certs/webtrees.key"),
     baseurl=get_environment_variable("BASE_URL"),
@@ -166,6 +171,9 @@ ENV = EnvVars(
     wtname=get_environment_variable("WT_NAME"),
     wtpass=get_environment_variable("WT_PASS"),
     wtemail=get_environment_variable("WT_EMAIL"),
+    # "or None" so empty values from compose are treated as unset
+    trustedproxies=get_environment_variable("TRUSTED_PROXIES") or None,
+    trustedheaders=get_environment_variable("TRUSTED_HEADERS") or None,
     dbkey=get_environment_variable("DB_KEY"),
     dbcert=get_environment_variable("DB_CERT"),
     dbca=get_environment_variable("DB_CA"),
@@ -174,13 +182,12 @@ ENV = EnvVars(
     phpmaxexecutiontime=get_environment_variable("PHP_MAX_EXECUTION_TIME", "90"),
     phppostmaxsize=get_environment_variable("PHP_POST_MAX_SIZE", "50M"),
     phpuploadmaxfilesize=get_environment_variable("PHP_UPLOAD_MAX_FILE_SIZE", "50M"),
-    puid=get_environment_variable("PUID", "33"),  # www-data user
-    pgid=get_environment_variable("PGID", "33"),
 )
 
 
 ROOT = "/var/www/webtrees"
 DATA_DIR = os.path.join(ROOT, "data")
+MODULES_DIR = os.path.join(ROOT, "modules_v4")
 CONFIG_FILE = os.path.join(DATA_DIR, "config.ini.php")
 PHP_INI_FILE = "/usr/local/etc/php/php.ini"
 
@@ -203,6 +210,11 @@ def retry_urlopen(url: str, data: bytes) -> None:
             # capture error as well
             resp = e
             print2(f"Recieved HTTP {resp.status} response")
+        except urllib.error.URLError as e:
+            # connection refused/reset, e.g. Apache is still starting up
+            print2(f"Connection failed: {e.reason}")
+            time.sleep(try_ + 1)
+            continue
 
         # check status code
         # 302 is also accpetable in case the user selected something other than port 80
@@ -305,6 +317,27 @@ def enable_apache_site(
     with open(ssl_site_file, "w") as fp:
         fp.writelines(new_ssl_site_file_lines)
 
+    # update the HTTPS redirect with the external HTTPS port.
+    # inside the container HTTPS is always port 8443, but the published
+    # host port may differ (e.g. 8443 for rootless setups)
+    redir_site_file = "/etc/apache2/sites-available/webtrees-redir.conf"
+    port_suffix = "" if ENV.httpsport == "443" else f":{ENV.httpsport}"
+
+    with open(redir_site_file, "r") as fp:
+        redir_site_file_lines = fp.readlines()
+
+    new_redir_site_file_lines = [
+        re.sub(
+            r"https://%\{SERVER_NAME\}(:\d+)?%\{REQUEST_URI\}",
+            f"https://%{{SERVER_NAME}}{port_suffix}%{{REQUEST_URI}}",
+            line,
+        )
+        for line in redir_site_file_lines
+    ]
+
+    with open(redir_site_file, "w") as fp:
+        fp.writelines(new_redir_site_file_lines)
+
     all_sites = ["webtrees", "webtrees-redir", "webtrees-ssl"]
 
     # perl complains about locale to stderr, so disable that
@@ -327,17 +360,17 @@ def enable_apache_site(
 
 def perms() -> None:
     """
-    Set up folder permissions
+    Set up folder permissions. The whole container runs as www-data
+    (ownership is fixed at build time), so this only makes sure the
+    expected directories exist and the config file stays private.
     """
 
-    print2("Setting up folder permissions for uploads")
-    # https://github.com/linuxserver/docker-baseimage-alpine/blob/bef0f4cee208396c92c0fdd1426613de02698301/root/etc/s6-overlay/s6-rc.d/init-adduser/run#L4-L9
-    subprocess.check_call(["groupmod", "-o", "-g", ENV.pgid, "www-data"])
-    subprocess.check_call(["usermod", "-o", "-u", ENV.puid, "www-data"])
-    subprocess.check_call(["chown", "-R", "www-data:www-data", DATA_DIR])
+    print2("Checking folder permissions for uploads")
+    # custom modules/themes volume, see https://webtrees.net/download/modules
+    os.makedirs(MODULES_DIR, exist_ok=True)
 
     if os.path.isfile(CONFIG_FILE):
-        subprocess.check_call(["chmod", "700", CONFIG_FILE])
+        os.chmod(CONFIG_FILE, 0o700)
 
 
 def php_ini() -> None:
@@ -425,7 +458,7 @@ def setup_wizard() -> None:
     # set us up to a known HTTP state
     enable_apache_site(["webtrees"])
     # run apache in the background
-    apache_proc = subprocess.Popen(["apache2-foreground"], stderr=subprocess.DEVNULL)
+    apache_proc = subprocess.Popen(["apache2-foreground"])
 
     if ENV.dbtype in [DBType.mysql, DBType.pgsql]:
         # for typing, check_db_variables already does this
@@ -467,8 +500,8 @@ def setup_wizard() -> None:
         # let Apache start up
         time.sleep(2)
 
-    # send it
-    url = "http://127.0.0.1:80/"
+    # send it (Apache listens on the unprivileged port 8080 inside the container)
+    url = "http://127.0.0.1:8080/"
     print2(f"Sending setup wizard request to {url}")
 
     retry_urlopen(
@@ -511,6 +544,10 @@ def update_config_file() -> None:
     set_config_value("rewrite_urls", str(int(ENV.prettyurls)))
     set_config_value("base_url", ENV.baseurl)
 
+    # reverse proxy settings, https://webtrees.net/admin/proxy/
+    set_config_value("trusted_proxies", ENV.trustedproxies)
+    set_config_value("trusted_headers", ENV.trustedheaders)
+
     # update database values as a group
     if check_db_variables():
         set_config_value("dbtype", ENV.dbtype.value)
@@ -541,14 +578,37 @@ def https() -> None:
     if not ENV.https:
         print2("Removing HTTPS")
         enable_apache_site(["webtrees"])
+        return
+
     # https with redirect
-    elif ENV.httpsredirect:
+    if ENV.httpsredirect:
         print2("Adding HTTPS, with HTTPS redirect")
         enable_apache_site(["webtrees-ssl", "webtrees-redir"])
     # https no redirect
     else:
         print2("Adding HTTPS, removing HTTPS redirect")
         enable_apache_site(["webtrees", "webtrees-ssl"])
+
+    # fail fast with a clear message instead of letting Apache die on a
+    # missing or unreadable certificate (enable_apache_site made the paths
+    # absolute)
+    for f in (ENV.sslcertfile, ENV.sslcertkeyfile):
+        if not os.path.isfile(f):
+            print2(f"ERROR: HTTPS is enabled but {f} does not exist.")
+            print2(
+                "ERROR: Mount certificates to /certs/ (generate self-signed"
+                " ones with 'make certs') or set HTTPS=0."
+            )
+            sys.exit(1)
+
+        if not os.access(f, os.R_OK):
+            print2(f"ERROR: HTTPS is enabled but {f} is not readable.")
+            print2(
+                "ERROR: The container runs as www-data (uid 33), which maps"
+                " to a subuid on the host - a 600 key owned by the host user"
+                " is not readable here. Fix with: chmod 644 <file>"
+            )
+            sys.exit(1)
 
 
 def htaccess() -> None:
@@ -595,7 +655,9 @@ def main() -> None:
     perms()
 
     print2("Starting Apache")
-    subprocess.run(["apache2-foreground"], stderr=subprocess.DEVNULL)
+    # do NOT swallow stderr here: the image symlinks Apache's error.log to
+    # stderr, so suppressing it hides every Apache startup/runtime error
+    subprocess.run(["apache2-foreground"])
 
 
 if __name__ == "__main__":

@@ -1,59 +1,110 @@
+# Rootless-friendly compose file for webtrees + MariaDB.
+# All settings come from the `.env` file (see `.env.example`).
+# Works with `podman compose` (rootless) and `docker compose`.
+name: webtrees
+
 services:
   app:
+    # The webtrees image is built locally from this repository.
+    # Build/rebuild with: podman compose build app   (or ./scripts/upgrade.sh)
+    build:
+      context: ./docker
+      args:
+        PHP_VERSION: ${PHP_VERSION:-8.4}
+        WEBTREES_VERSION: ${WEBTREES_VERSION:?WEBTREES_VERSION must be set in .env}
+        UPGRADE_PATCH_VERSION: ${UPGRADE_PATCH_VERSION:-2}
+    image: ${WEBTREES_IMAGE:-localhost/webtrees}:${WEBTREES_VERSION:?WEBTREES_VERSION must be set in .env}
+    container_name: webtrees-app
+    # No service_healthy condition on purpose: the entrypoint waits for the
+    # database itself, and podman-compose's health wait blocks forever in
+    # environments where healthchecks cannot run (they need systemd timers).
     depends_on:
       - db
     environment:
-      PRETTY_URLS: "1"
-      HTTPS: "0"
-      HTTPS_REDIRECT: "0"
-      LANG: "en-US"
-      BASE_URL: "http://localhost:80"
-      DB_TYPE: "mysql"
-      DB_HOST: "db"
-      DB_PORT: "3306"
-      DB_USER: "webtrees"
-      DB_PASS: "baddbpassword"
-      DB_NAME: "webtrees"
-      DB_PREFIX: "wt_"
-      WT_USER: "username"
-      WT_NAME: "Full Name"
-      WT_PASS: "badwtpassword"
-      WT_EMAIL: "me@example.com"
-      PUID: "1000"
-      PGID: "1000"
-    image: ghcr.io/nathanvaughn/webtrees:latest
+      PRETTY_URLS: ${PRETTY_URLS:-1}
+      HTTPS: ${HTTPS:-0}
+      HTTPS_REDIRECT: ${HTTPS_REDIRECT:-0}
+      # external HTTPS port, so the HTTP->HTTPS redirect points to it
+      HTTPS_PORT: ${HTTPS_PORT:-8443}
+      SSL_CERT_FILE: ${SSL_CERT_FILE:-/certs/webtrees.crt}
+      SSL_CERT_KEY_FILE: ${SSL_CERT_KEY_FILE:-/certs/webtrees.key}
+      LANG: ${WEBTREES_LANG:-en-US}
+      BASE_URL: ${BASE_URL:?BASE_URL must be set in .env}
+      # reverse proxy support, see https://webtrees.net/admin/proxy/
+      TRUSTED_PROXIES: ${TRUSTED_PROXIES:-}
+      TRUSTED_HEADERS: ${TRUSTED_HEADERS:-}
+      DB_TYPE: mysql
+      DB_HOST: db
+      DB_PORT: 3306
+      DB_USER: ${DB_USER:-webtrees}
+      DB_PASS: ${DB_PASS:?DB_PASS must be set in .env}
+      DB_NAME: ${DB_NAME:-webtrees}
+      DB_PREFIX: ${DB_PREFIX:-wt_}
+      WT_USER: ${WT_USER:-}
+      WT_NAME: ${WT_NAME:-}
+      WT_PASS: ${WT_PASS:-}
+      WT_EMAIL: ${WT_EMAIL:-}
+      PHP_MEMORY_LIMIT: ${PHP_MEMORY_LIMIT:-1024M}
+      PHP_MAX_EXECUTION_TIME: ${PHP_MAX_EXECUTION_TIME:-90}
+      PHP_POST_MAX_SIZE: ${PHP_POST_MAX_SIZE:-50M}
+      PHP_UPLOAD_MAX_FILE_SIZE: ${PHP_UPLOAD_MAX_FILE_SIZE:-50M}
     ports:
-      - 80:80
-      # - 443:443
-    restart: unless-stopped
+      # BIND_ADDRESS=127.0.0.1 restricts access to a local reverse proxy.
+      # The container runs entirely as www-data, so Apache listens on the
+      # unprivileged ports 8080/8443 inside the container as well.
+      - "${BIND_ADDRESS:-0.0.0.0}:${HTTP_PORT:-8080}:8080"
+      - "${BIND_ADDRESS:-0.0.0.0}:${HTTPS_PORT:-8443}:8443"
+    # covers container crashes; start-on-boot is handled by the systemd
+    # user unit, see scripts/install-autostart.sh
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    # nothing in the image runs as root (USER www-data), so no capabilities
+    # are needed at all
+    cap_drop:
+      - ALL
     volumes:
-      # - ~/certs:/certs/
       - app_data:/var/www/webtrees/data/
+      # TLS certificates, used when HTTPS=1
+      # (generate self-signed ones with: make certs)
+      - ./certs:/certs/:ro,Z
+      # Custom themes/modules, see https://webtrees.net/download/modules
+      # (install with: ./scripts/install-module.sh <url-or-file>)
+      - app_modules:/var/www/webtrees/modules_v4/
 
   db:
+    image: ${MARIADB_IMAGE:-docker.io/library/mariadb}:${MARIADB_VERSION:-12}
+    container_name: webtrees-db
+    # run as the image's mysql user (999) from the start, so no process in
+    # this container ever runs as root
+    user: "999:999"
     environment:
-      MARIADB_DATABASE: "webtrees"
-      MARIADB_USER: "webtrees"
-      MARIADB_ROOT_PASSWORD: "badrootpassword"
-      MARIADB_PASSWORD: "baddbpassword"
-    # See: https://github.com/NathanVaughn/webtrees-docker/issues/145
-    image: docker.io/library/mariadb:12
-    restart: unless-stopped
+      MARIADB_DATABASE: ${DB_NAME:-webtrees}
+      MARIADB_USER: ${DB_USER:-webtrees}
+      MARIADB_PASSWORD: ${DB_PASS:?DB_PASS must be set in .env}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?MARIADB_ROOT_PASSWORD must be set in .env}
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    # covers container crashes; start-on-boot is handled by the systemd
+    # user unit, see scripts/install-autostart.sh
+    restart: always
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
     volumes:
       - db_data:/var/lib/mysql
 
-  # db:
-  #   environment:
-  #     POSTGRES_DB: "webtrees"
-  #     POSTGRES_USER: "webtrees"
-  #     POSTGRES_PASSWORD: "badpassword"
-  #   image: docker.io/library/postgres:latest
-  #   restart: unless-stopped
-  #   volumes:
-  #     - db_data:/var/lib/postgresql/data
-
 volumes:
-  db_data:
-    driver: local
+  # Explicit names so the backup/restore scripts can address them
+  # independently of the compose project name.
   app_data:
-    driver: local
+    name: webtrees_app_data
+  db_data:
+    name: webtrees_db_data
+  app_modules:
+    name: webtrees_app_modules
