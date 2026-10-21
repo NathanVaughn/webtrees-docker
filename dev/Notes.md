@@ -22,6 +22,8 @@ Rename and copy into the repo. Update the dict in `versionchecker.py`.
 
 <https://webtrees.net/download>
 
+Also see <https://www.php.net/archive/2026.php#2026-10-21-5>
+
 ## Release Dates
 
 <https://api.github.com/repos/fisharebest/webtrees/releases?per_page=20>

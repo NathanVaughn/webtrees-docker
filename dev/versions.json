@@ -1,7 +1,7 @@
 [
     {
         "version": "2.2.6",
-        "php": "8.4",
+        "php": "8.4.27",
         "upgrade_patch": 2,
         "created": "2026-04-29T10:11:35Z",
         "prerelease": false,
@@ -13,7 +13,7 @@
     },
     {
         "version": "2.2.5",
-        "php": "8.4",
+        "php": "8.4.27",
         "upgrade_patch": 2,
         "created": "2026-01-13T07:16:00Z",
         "prerelease": false,
@@ -21,7 +21,7 @@
     },
     {
         "version": "2.2.4",
-        "php": "8.4",
+        "php": "8.4.27",
         "upgrade_patch": 2,
         "created": "2025-08-04T17:17:14Z",
         "prerelease": false,
@@ -29,7 +29,7 @@
     },
     {
         "version": "2.2.3",
-        "php": "8.4",
+        "php": "8.4.27",
         "upgrade_patch": 2,
         "created": "2025-07-30T12:09:02Z",
         "prerelease": false,
@@ -37,7 +37,7 @@
     },
     {
         "version": "2.2.2",
-        "php": "8.4",
+        "php": "8.4.27",
         "upgrade_patch": 2,
         "created": "2025-07-29T10:13:56Z",
         "prerelease": false,
@@ -45,7 +45,7 @@
     },
     {
         "version": "2.2.1",
-        "php": "8.4",
+        "php": "8.4.27",
         "upgrade_patch": 2,
         "created": "2024-11-30T15:11:53Z",
         "prerelease": false,
@@ -53,7 +53,7 @@
     },
     {
         "version": "2.2.0",
-        "php": "8.4",
+        "php": "8.4.27",
         "upgrade_patch": 2,
         "created": "2024-11-22T21:53:08Z",
         "prerelease": false,
@@ -61,7 +61,7 @@
     },
     {
         "version": "2.1.27",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 2,
         "created": "2026-04-29T10:22:07Z",
         "prerelease": false,
@@ -71,7 +71,7 @@
     },
     {
         "version": "2.1.26",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 2,
         "created": "2026-01-13T06:50:00Z",
         "prerelease": false,
@@ -79,7 +79,7 @@
     },
     {
         "version": "2.1.25",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 2,
         "created": "2025-08-04T17:42:09Z",
         "prerelease": false,
@@ -87,7 +87,7 @@
     },
     {
         "version": "2.1.24",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 2,
         "created": "2025-07-30T12:04:42Z",
         "prerelease": false,
@@ -95,7 +95,7 @@
     },
     {
         "version": "2.1.23",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 2,
         "created": "2025-07-29T10:24:58Z",
         "prerelease": false,
@@ -103,7 +103,7 @@
     },
     {
         "version": "2.1.22",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 2,
         "created": "2024-11-30T15:13:50Z",
         "prerelease": false,
@@ -111,7 +111,7 @@
     },
     {
         "version": "2.1.21",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 2,
         "created": "2024-11-22T21:43:55Z",
         "prerelease": false,
@@ -119,7 +119,7 @@
     },
     {
         "version": "2.1.20",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 2,
         "created": "2024-04-08T20:30:45Z",
         "prerelease": false,
@@ -127,7 +127,7 @@
     },
     {
         "version": "2.1.19",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 2,
         "created": "2024-03-19T13:33:20Z",
         "prerelease": false,
@@ -135,7 +135,7 @@
     },
     {
         "version": "2.1.18",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2023-10-18T19:18:26Z",
         "prerelease": false,
@@ -143,7 +143,7 @@
     },
     {
         "version": "2.1.17",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2023-07-14T08:29:58Z",
         "prerelease": false,
@@ -151,7 +151,7 @@
     },
     {
         "version": "2.1.16",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2023-01-16T11:34:35Z",
         "prerelease": false,
@@ -159,7 +159,7 @@
     },
     {
         "version": "2.1.15",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-12-25T07:58:59Z",
         "prerelease": false,
@@ -167,7 +167,7 @@
     },
     {
         "version": "2.1.14",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-12-24T09:13:18Z",
         "prerelease": false,
@@ -175,7 +175,7 @@
     },
     {
         "version": "2.1.13",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-12-15T10:17:32Z",
         "prerelease": false,
@@ -183,7 +183,7 @@
     },
     {
         "version": "2.1.12",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-12-05T12:56:50Z",
         "prerelease": false,
@@ -191,7 +191,7 @@
     },
     {
         "version": "2.1.11",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-12-05T06:38:27Z",
         "prerelease": false,
@@ -199,7 +199,7 @@
     },
     {
         "version": "2.1.10",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-12-04T20:05:45Z",
         "prerelease": false,
@@ -207,7 +207,7 @@
     },
     {
         "version": "2.1.9",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-11-30T19:31:43Z",
         "prerelease": false,
@@ -215,7 +215,7 @@
     },
     {
         "version": "2.1.8",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-11-27T17:25:13Z",
         "prerelease": false,
@@ -223,7 +223,7 @@
     },
     {
         "version": "2.1.7",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-07-29T16:38:28Z",
         "prerelease": false,
@@ -231,7 +231,7 @@
     },
     {
         "version": "2.1.6",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-06-20T15:31:53Z",
         "prerelease": false,
@@ -239,7 +239,7 @@
     },
     {
         "version": "2.1.5",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-06-04T13:17:50Z",
         "prerelease": false,
@@ -247,7 +247,7 @@
     },
     {
         "version": "2.1.4",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-05-22T06:15:25Z",
         "prerelease": false,
@@ -255,7 +255,7 @@
     },
     {
         "version": "2.1.3",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-05-21T21:29:36Z",
         "prerelease": false,
@@ -263,7 +263,7 @@
     },
     {
         "version": "2.1.2",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-05-04T21:33:36Z",
         "prerelease": false,
@@ -271,7 +271,7 @@
     },
     {
         "version": "2.1.1",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-04-29T08:58:52Z",
         "prerelease": false,
@@ -279,7 +279,7 @@
     },
     {
         "version": "2.1.0-beta.2",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-04-03T13:39:13Z",
         "prerelease": true,
@@ -287,7 +287,7 @@
     },
     {
         "version": "2.1.0-beta.1",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-03-16T15:32:41Z",
         "prerelease": true,
@@ -295,7 +295,7 @@
     },
     {
         "version": "2.1.0-alpha.2",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-02-02T13:23:30Z",
         "prerelease": true,
@@ -303,7 +303,7 @@
     },
     {
         "version": "2.1.0-alpha.1",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2021-12-02T15:41:09Z",
         "prerelease": true,
@@ -311,7 +311,7 @@
     },
     {
         "version": "2.1.0",
-        "php": "8.2",
+        "php": "8.2.35",
         "upgrade_patch": 1,
         "created": "2022-04-20T12:49:36Z",
         "prerelease": false,
