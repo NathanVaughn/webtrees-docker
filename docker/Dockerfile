@@ -1,4 +1,4 @@
-ARG PHP_VERSION=8.4
+ARG PHP_VERSION=8.4.27
 
 FROM docker.io/library/php:$PHP_VERSION-apache
 
