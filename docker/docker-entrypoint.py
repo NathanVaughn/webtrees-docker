@@ -8,7 +8,7 @@ import time
 import urllib.error
 from dataclasses import dataclass
 from enum import Enum
-from typing import Any, List, Literal, Optional, TypeVar, Union, overload
+from typing import Any, Literal, TypeVar, overload
 from urllib import request
 from urllib.parse import urlencode
 
@@ -32,22 +32,22 @@ class EnvVars:
     sslcertfile: str
     sslcertkeyfile: str
     lang: str
-    baseurl: Optional[str]
+    baseurl: str | None
     dbtype: DBType
-    dbhost: Optional[str]
+    dbhost: str | None
     dbport: str
     dbuser: str
-    dbpass: Optional[str]
+    dbpass: str | None
     dbname: str
     tblpfx: str
-    wtuser: Optional[str]
-    wtname: Optional[str]
-    wtpass: Optional[str]
-    wtemail: Optional[str]
+    wtuser: str | None
+    wtname: str | None
+    wtpass: str | None
+    wtemail: str | None
     # https://github.com/fisharebest/webtrees/blob/f9a3af650116d75f1a87f454cabff5e9047e43f3/app/Http/Middleware/UseDatabase.php#L71-L82
-    dbkey: Optional[str]
-    dbcert: Optional[str]
-    dbca: Optional[str]
+    dbkey: str | None
+    dbcert: str | None
+    dbca: str | None
     dbverify: bool
     # php settings
     phpmemorylimit: str
@@ -59,7 +59,7 @@ class EnvVars:
     pgid: str
 
 
-def truish(value: Optional[str]) -> bool:
+def truish(value: str | None) -> bool:
     """
     Check if a value is close enough to true
     """
@@ -81,19 +81,19 @@ T = TypeVar("T")
 
 @overload
 def get_environment_variable(
-    key: str, default: None = None, alternates: Optional[List[str]] = None
-) -> Optional[str]: ...
+    key: str, default: None = None, alternates: list[str] | None = None
+) -> str | None: ...
 
 
 @overload
 def get_environment_variable(
-    key: str, default: T = None, alternates: Optional[List[str]] = None
+    key: str, default: T, alternates: list[str] | None = None
 ) -> T: ...
 
 
 def get_environment_variable(
-    key: str, default: Optional[T] = None, alternates: Optional[List[str]] = None
-) -> Union[Optional[str], T]:
+    key: str, default: T | None = None, alternates: list[str] | None = None
+) -> str | None | T:
     """
     Try to find the value of an environment variable.
     """
@@ -248,7 +248,7 @@ def add_line_to_file(filename: str, newline: str) -> None:
         fp.writelines(lines)
 
 
-def set_config_value(key: str, value: Optional[str]) -> None:
+def set_config_value(key: str, value: str | None) -> None:
     """
     In the config file, make sure the given key is set to the given value.
     """
@@ -273,7 +273,7 @@ def set_php_ini_value(key: str, value: str) -> None:
 
 
 def enable_apache_site(
-    enable_sites: List[Literal["webtrees", "webtrees-redir", "webtrees-ssl"]],
+    enable_sites: list[Literal["webtrees", "webtrees-redir", "webtrees-ssl"]],
 ) -> None:
     """
     Enable an Apache site.
@@ -458,8 +458,8 @@ def setup_wizard() -> None:
             cmd = ["pg_isready", "-h", ENV.dbhost, "-p", ENV.dbport, "--quiet"]
             name = "PostgreSQL"
 
-        while subprocess.run(cmd).returncode != 0:  # type: ignore
-            print2(f"Waiting for {name} server {ENV.dbhost}:{ENV.dbport} to be ready")  # type: ignore
+        while subprocess.run(cmd, check=False).returncode != 0:
+            print2(f"Waiting for {name} server {ENV.dbhost}:{ENV.dbport} to be ready")
             time.sleep(1)
 
     else:
@@ -595,7 +595,7 @@ def main() -> None:
     perms()
 
     print2("Starting Apache")
-    subprocess.run(["apache2-foreground"], stderr=subprocess.DEVNULL)
+    os.execvp("apache2-foreground", ["apache2-foreground"])
 
 
 if __name__ == "__main__":

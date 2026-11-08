@@ -36,7 +36,7 @@ def main(tags: list[str]) -> None:
         print(" ".join(cmd))
 
         if IS_GA:
-            subprocess.run(cmd)
+            subprocess.run(cmd, check=False)
 
 
 if __name__ == "__main__":
