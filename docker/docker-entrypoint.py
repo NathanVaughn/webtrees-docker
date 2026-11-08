@@ -458,7 +458,7 @@ def setup_wizard() -> None:
             cmd = ["pg_isready", "-h", ENV.dbhost, "-p", ENV.dbport, "--quiet"]
             name = "PostgreSQL"
 
-        while subprocess.run(cmd).returncode != 0:
+        while subprocess.run(cmd, check=False).returncode != 0:
             print2(f"Waiting for {name} server {ENV.dbhost}:{ENV.dbport} to be ready")
             time.sleep(1)
 
