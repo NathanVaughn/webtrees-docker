@@ -32,12 +32,6 @@ RUN pecl install imagick \
  && docker-php-ext-configure gd --with-freetype --with-jpeg \
  && docker-php-ext-install -j"$(nproc)" pdo pdo_mysql pdo_pgsql zip intl gd exif opcache
 
-# remove old apt stuff
-RUN apt-get purge gcc g++ make -y \
- && apt-get autoremove -y \
- && apt-get clean \
- && rm -rf /var/tmp/* /etc/apache2/sites-enabled/000-*.conf
-
 ARG WEBTREES_VERSION
 RUN curl -s -L https://github.com/fisharebest/webtrees/releases/download/${WEBTREES_VERSION}/webtrees-${WEBTREES_VERSION}.zip -o webtrees.zip \
  && unzip -q webtrees.zip -d /var/www/ && rm webtrees.zip \
@@ -53,6 +47,12 @@ RUN patch app/Services/UpgradeService.php /UpgradeService.patch \
 # https://www.webtrees.net/index.php/fr/forum/help-for-2-0/36616-email-error-after-update-to-2-0-21#89985
 # https://github.com/NathanVaughn/webtrees-docker/issues/88
  && rm vendor/egulias/email-validator/src/Validation/MessageIDValidation.php
+
+# remove old apt stuff
+RUN apt-get purge gcc g++ make -y \
+ && apt-get autoremove -y \
+ && apt-get clean \
+ && rm -rf /var/tmp/* /etc/apache2/sites-enabled/000-*.conf
 
 # enable apache modules
 RUN a2enmod rewrite && a2enmod ssl && rm -rf /var/www/html
